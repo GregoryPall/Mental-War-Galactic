@@ -20,74 +20,40 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg); color: var(--text);
     font-family: 'Exo 2', sans-serif;
-    min-height: 100vh;
-    overflow: hidden;
-    position: relative;
+    min-height: 100vh; overflow: hidden; position: relative;
   }
   #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
   body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(var(--grid) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none; z-index: 0;
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
   }
-
   .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; }
   .screen.hidden { display: none; }
 
   /* ===== LOBBY ===== */
   .lobby-box {
     background: linear-gradient(135deg, rgba(10,22,40,0.97), rgba(5,10,20,0.97));
-    border: 1px solid rgba(0,200,255,0.2);
-    border-radius: 4px;
-    padding: 48px 56px;
-    width: 480px;
+    border: 1px solid rgba(0,200,255,0.2); border-radius: 4px;
+    padding: 48px 56px; width: 480px;
     box-shadow: 0 0 60px rgba(0,200,255,0.08), inset 0 1px 0 rgba(255,255,255,0.05);
     text-align: center;
   }
-  .lobby-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 28px; font-weight: 900; letter-spacing: 4px;
-    color: var(--team1);
-    text-shadow: 0 0 30px rgba(0,229,255,0.5);
-    margin-bottom: 8px;
-  }
+  .lobby-title { font-family: 'Orbitron', monospace; font-size: 28px; font-weight: 900; letter-spacing: 4px; color: var(--team1); text-shadow: 0 0 30px rgba(0,229,255,0.5); margin-bottom: 8px; }
   .lobby-sub { font-size: 11px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; margin-bottom: 40px; }
-  .lobby-input {
-    width: 100%;
-    background: rgba(0,200,255,0.05);
-    border: 1px solid rgba(0,200,255,0.2);
-    border-radius: 2px;
-    color: var(--text);
-    font-family: 'Exo 2', sans-serif;
-    font-size: 16px; padding: 14px 18px;
-    outline: none; margin-bottom: 20px;
-    transition: border-color 0.2s;
-  }
-  .lobby-input:focus { border-color: var(--team1); box-shadow: 0 0 20px rgba(0,229,255,0.1); }
+  .lobby-input { width: 100%; background: rgba(0,200,255,0.05); border: 1px solid rgba(0,200,255,0.2); border-radius: 2px; color: var(--text); font-family: 'Exo 2', sans-serif; font-size: 16px; padding: 14px 18px; outline: none; margin-bottom: 20px; transition: border-color 0.2s; }
+  .lobby-input:focus { border-color: var(--team1); }
   .lobby-input::placeholder { color: var(--dim); }
-  .btn {
-    width: 100%; padding: 14px; border: none; border-radius: 2px;
-    font-family: 'Orbitron', monospace; font-size: 12px; letter-spacing: 3px; font-weight: 700;
-    cursor: pointer; transition: all 0.2s; text-transform: uppercase;
-  }
+  .btn { width: 100%; padding: 14px; border: none; border-radius: 2px; font-family: 'Orbitron', monospace; font-size: 12px; letter-spacing: 3px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
   .btn-primary { background: linear-gradient(135deg, var(--team1), #0088aa); color: #000; box-shadow: 0 0 20px rgba(0,229,255,0.3); }
   .btn-primary:hover { box-shadow: 0 0 40px rgba(0,229,255,0.5); transform: translateY(-1px); }
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
   .btn-danger { background: linear-gradient(135deg, var(--team2), #880000); color: #fff; box-shadow: 0 0 20px rgba(255,68,68,0.3); margin-top: 10px; }
   .players-waiting { margin-top: 32px; text-align: left; }
   .players-waiting-title { font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 3px; color: var(--dim); margin-bottom: 12px; }
-  .player-chip {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 2px; padding: 6px 12px; margin: 4px; font-size: 13px;
-  }
+  .player-chip { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 2px; padding: 6px 12px; margin: 4px; font-size: 13px; }
   .player-dot { width: 8px; height: 8px; border-radius: 50%; }
   .dot-t1 { background: var(--team1); box-shadow: 0 0 8px var(--team1); }
   .dot-t2 { background: var(--team2); box-shadow: 0 0 8px var(--team2); }
@@ -95,208 +61,98 @@
   .launch-section { margin-top: 24px; }
   .launch-info { font-size: 12px; color: var(--dim); margin-bottom: 12px; }
 
-  /* ===== GAME ===== */
-  #game-screen { flex-direction: column; background: transparent; }
-
+  /* ===== HUD ===== */
   #hud {
-    position: fixed; top: 0; left: 0; right: 0;
+    position: fixed; top: 0; left: 0; right: 0; height: 50px;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 24px;
-    background: rgba(5,10,20,0.9);
+    padding: 0 24px;
+    background: rgba(5,10,20,0.92);
     border-bottom: 1px solid rgba(0,200,255,0.1);
     z-index: 100; gap: 16px;
   }
   .hud-player { font-family: 'Orbitron', monospace; font-size: 11px; letter-spacing: 2px; }
-  .hud-scores { display: flex; gap: 24px; }
-  .hud-score { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-  .hud-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .hud-ships { font-family: 'Orbitron', monospace; font-size: 13px; color: var(--gold); }
-  .hud-timer {
-    font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 700;
-    color: var(--team1); text-shadow: 0 0 20px rgba(0,229,255,0.5);
-    min-width: 80px; text-align: center;
-  }
-  .hud-timer.urgent { color: var(--team2); text-shadow: 0 0 20px rgba(255,68,68,0.5); animation: pulse 0.5s infinite alternate; }
-  @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
+  .hud-scores { display: flex; gap: 20px; }
+  .hud-score { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .hud-dot { width: 9px; height: 9px; border-radius: 50%; }
 
-  #map-container { position: fixed; top: 56px; left: 0; right: 320px; bottom: 0; z-index: 5; }
+  /* ===== BANDEAU ÉQUIPE ===== */
+  #team-banner {
+    position: fixed; top: 50px; left: 0; right: 0; height: 42px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px;
+    z-index: 99;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .banner-planet { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; letter-spacing: 3px; }
+  .banner-stats { display: flex; gap: 32px; font-size: 12px; }
+  .banner-stat { display: flex; align-items: center; gap: 8px; }
+  .banner-stat-label { letter-spacing: 1px; opacity: 0.6; font-size: 10px; }
+  .banner-stat-val { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 15px; }
+  .banner-timer { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 700; min-width: 60px; text-align: right; }
+  .banner-timer.urgent { animation: pulse 0.5s infinite alternate; }
+  @keyframes pulse { from { opacity: 1; } to { opacity: 0.3; } }
+
+  /* ===== MAP ===== */
+  #map-container { position: fixed; top: 92px; left: 0; right: 320px; bottom: 0; z-index: 5; }
   #map-svg { width: 100%; height: 100%; }
 
-  /* ===== QUESTION PANEL (droite) ===== */
-  #question-panel {
-    position: fixed;
-    top: 56px; right: 0; bottom: 0;
-    width: 320px;
+  /* ===== PANEL DROITE ===== */
+  #right-panel {
+    position: fixed; top: 92px; right: 0; bottom: 0; width: 320px;
     background: rgba(5,10,20,0.97);
-    border-left: 1px solid rgba(0,200,255,0.2);
-    padding: 28px 24px;
+    border-left: 1px solid rgba(0,200,255,0.15);
     z-index: 200;
     display: flex; flex-direction: column;
-    overflow-y: auto;
   }
-  #question-panel.hidden { display: none; }
 
-  .q-label { font-size: 10px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; margin-bottom: 12px; }
-  .q-progress { display: flex; gap: 5px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
-  .q-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: rgba(255,255,255,0.1);
-    transition: background 0.3s;
-  }
+  /* Questions */
+  #question-panel { padding: 24px 22px; display: flex; flex-direction: column; flex: 1; overflow-y: auto; }
+  #question-panel.hidden { display: none; }
+  .q-label { font-size: 10px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; margin-bottom: 10px; }
+  .q-progress { display: flex; gap: 5px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .q-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: background 0.3s; }
   .q-dot.correct { background: var(--team3); box-shadow: 0 0 8px var(--team3); }
   .q-dot.wrong { background: var(--team2); box-shadow: 0 0 8px var(--team2); }
   .q-dot.active { background: var(--team1); box-shadow: 0 0 8px var(--team1); animation: blink 0.8s infinite alternate; }
   @keyframes blink { from { opacity: 1; } to { opacity: 0.3; } }
-
-  .q-text {
-    font-family: 'Orbitron', monospace;
-    font-size: 26px; font-weight: 700; color: #fff;
-    margin-bottom: 24px; letter-spacing: 1px;
-    text-align: center; line-height: 1.3;
-  }
+  .q-text { font-family: 'Orbitron', monospace; font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 20px; letter-spacing: 1px; text-align: center; line-height: 1.3; }
   .q-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .q-btn {
-    padding: 14px 10px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 2px;
-    color: var(--text);
-    font-family: 'Exo 2', sans-serif;
-    font-size: 20px; font-weight: 600;
-    cursor: pointer; transition: all 0.15s;
-  }
+  .q-btn { padding: 13px 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 2px; color: var(--text); font-family: 'Exo 2', sans-serif; font-size: 19px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
   .q-btn:hover { background: rgba(0,200,255,0.1); border-color: var(--team1); color: #fff; }
   .q-btn.correct { background: rgba(68,255,136,0.15); border-color: var(--team3); color: var(--team3); }
   .q-btn.wrong { background: rgba(255,68,68,0.15); border-color: var(--team2); color: var(--team2); }
   .q-btn:disabled { cursor: default; }
 
-  /* Résultat fin de quiz */
-  .q-result {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center;
-  }
-  .q-result-score {
-    font-family: 'Orbitron', monospace;
-    font-size: 64px; font-weight: 900;
-    color: var(--gold);
-    text-shadow: 0 0 40px rgba(255,215,0,0.5);
-    line-height: 1;
-    margin-bottom: 8px;
-  }
-  .q-result-label { font-size: 11px; letter-spacing: 3px; color: var(--dim); margin-bottom: 28px; }
-  .q-result-instruction {
-    font-size: 13px; color: var(--text); line-height: 1.6;
-    padding: 16px;
-    background: rgba(0,200,255,0.05);
-    border: 1px solid rgba(0,200,255,0.15);
-    border-radius: 2px;
-  }
-
-  /* ===== ATTACK INSTRUCTION (droite, phase attaque) ===== */
-  #attack-panel {
-    position: fixed;
-    top: 56px; right: 0; bottom: 0;
-    width: 320px;
-    background: rgba(5,10,20,0.97);
-    border-left: 1px solid rgba(255,215,0,0.2);
-    padding: 28px 24px;
-    z-index: 200;
-    display: flex; flex-direction: column;
-    align-items: center;
-  }
+  /* Attaque */
+  #attack-panel { padding: 24px 22px; display: flex; flex-direction: column; align-items: center; flex: 1; }
   #attack-panel.hidden { display: none; }
-
-  .ap-ships-big {
-    font-family: 'Orbitron', monospace;
-    font-size: 72px; font-weight: 900;
-    color: var(--gold);
-    text-shadow: 0 0 40px rgba(255,215,0,0.5);
-    line-height: 1;
-    margin: 20px 0 4px;
-  }
-  .ap-ships-label { font-size: 10px; letter-spacing: 3px; color: var(--dim); margin-bottom: 32px; }
-
-  .ap-step {
-    width: 100%;
-    padding: 14px 16px;
-    border-radius: 2px;
-    font-size: 13px;
-    line-height: 1.5;
-    margin-bottom: 12px;
-    text-align: center;
-  }
-  .ap-step-active {
-    background: rgba(0,200,255,0.08);
-    border: 1px solid rgba(0,200,255,0.3);
-    color: var(--team1);
-    font-weight: 600;
-  }
-  .ap-step-done {
-    background: rgba(68,255,136,0.06);
-    border: 1px solid rgba(68,255,136,0.2);
-    color: var(--team3);
-  }
-  .ap-step-waiting {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.06);
-    color: var(--dim);
-  }
-
-  .ap-selected-info {
-    font-size: 12px; color: var(--dim);
-    min-height: 18px; margin-bottom: 16px;
-    text-align: center;
-  }
-
-  .ap-cancel {
-    margin-top: auto;
-    background: none; border: none;
-    color: var(--dim); font-size: 11px;
-    cursor: pointer; letter-spacing: 2px;
-    text-decoration: underline;
-    padding: 8px;
-  }
+  .ap-ships-big { font-family: 'Orbitron', monospace; font-size: 68px; font-weight: 900; color: var(--gold); text-shadow: 0 0 40px rgba(255,215,0,0.5); line-height: 1; margin: 12px 0 4px; }
+  .ap-ships-label { font-size: 10px; letter-spacing: 3px; color: var(--dim); margin-bottom: 28px; }
+  .ap-step { width: 100%; padding: 13px 14px; border-radius: 2px; font-size: 13px; line-height: 1.5; margin-bottom: 10px; text-align: center; }
+  .ap-step-active { background: rgba(0,200,255,0.08); border: 1px solid rgba(0,200,255,0.3); color: var(--team1); font-weight: 600; }
+  .ap-step-done { background: rgba(68,255,136,0.06); border: 1px solid rgba(68,255,136,0.2); color: var(--team3); }
+  .ap-step-waiting { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); color: var(--dim); }
+  .ap-cancel { margin-top: auto; background: none; border: none; color: var(--dim); font-size: 11px; cursor: pointer; letter-spacing: 2px; text-decoration: underline; padding: 8px; }
   .ap-cancel:hover { color: var(--text); }
 
   /* ===== WINNER ===== */
   #winner-screen { flex-direction: column; background: rgba(0,0,0,0.85); z-index: 300; }
   .winner-box { text-align: center; padding: 60px; }
   .winner-label { font-size: 11px; letter-spacing: 4px; color: var(--dim); margin-bottom: 16px; }
-  .winner-name {
-    font-family: 'Orbitron', monospace;
-    font-size: 64px; font-weight: 900; letter-spacing: 6px; margin-bottom: 8px;
-  }
+  .winner-name { font-family: 'Orbitron', monospace; font-size: 64px; font-weight: 900; letter-spacing: 6px; margin-bottom: 8px; }
   .winner-sub { font-size: 14px; color: var(--dim); letter-spacing: 3px; }
 
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .fade-in { animation: fadeIn 0.4s ease forwards; }
 
-  #toast {
-    position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
-    background: rgba(10,22,40,0.95);
-    border: 1px solid rgba(0,200,255,0.2);
-    border-radius: 2px;
-    padding: 10px 18px;
-    font-size: 12px;
-    z-index: 400;
-    transition: opacity 0.3s;
-    pointer-events: none;
-    white-space: nowrap;
-  }
+  #toast { position: fixed; top: 100px; left: calc(50% - 160px); background: rgba(10,22,40,0.95); border: 1px solid rgba(0,200,255,0.2); border-radius: 2px; padding: 10px 18px; font-size: 12px; z-index: 400; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
   #toast.hidden { opacity: 0; }
 
-  /* Pulse animation pour sélection planète */
-  @keyframes selectPulse {
-    0%   { stroke-width: 3; opacity: 0.9; }
-    50%  { stroke-width: 6; opacity: 0.5; }
-    100% { stroke-width: 3; opacity: 0.9; }
-  }
+  @keyframes selectPulse { 0% { stroke-width: 3; opacity: 0.9; } 50% { stroke-width: 6; opacity: 0.5; } 100% { stroke-width: 3; opacity: 0.9; } }
   .planet-selected-ring { animation: selectPulse 1s infinite; }
 </style>
 </head>
 <body>
-
 <canvas id="stars"></canvas>
 
 <!-- LOBBY -->
@@ -304,15 +160,14 @@
   <div class="lobby-box fade-in">
     <div class="lobby-title">MENTAL WAR</div>
     <div class="lobby-sub">Galactic Edition</div>
-    <input class="lobby-input" id="pseudo-input" type="text" placeholder="Ton pseudo de commandant" maxlength="16"
-      onkeydown="if(event.key==='Enter') joinLobby()">
+    <input class="lobby-input" id="pseudo-input" type="text" placeholder="Ton pseudo de commandant" maxlength="16" onkeydown="if(event.key==='Enter') joinLobby()">
     <button class="btn btn-primary" id="join-btn" onclick="joinLobby()">Rejoindre la galaxie</button>
     <div class="players-waiting" id="players-waiting" style="display:none">
       <div class="players-waiting-title">Commandants en attente</div>
       <div id="players-list"></div>
       <div class="launch-section" id="launch-section" style="display:none">
         <div class="launch-info" id="launch-info"></div>
-        <button class="btn btn-primary" id="launch-btn" onclick="launchGame()">⚡ Lancer la partie</button>
+        <button class="btn btn-primary" onclick="launchGame()">⚡ Lancer la partie</button>
       </div>
     </div>
   </div>
@@ -320,13 +175,32 @@
 
 <!-- GAME -->
 <div id="game-screen" class="screen hidden">
+
+  <!-- HUD global -->
   <div id="hud">
     <div class="hud-player" id="hud-player"></div>
     <div class="hud-scores" id="hud-scores"></div>
-    <div class="hud-timer" id="hud-timer">—</div>
-    <div class="hud-ships">🚀 <span id="hud-ships">0</span> vaisseaux</div>
   </div>
 
+  <!-- Bandeau équipe -->
+  <div id="team-banner">
+    <div class="banner-planet" id="banner-planet"></div>
+    <div class="banner-stats">
+      <div class="banner-stat">
+        <span class="banner-stat-label">MOI</span>
+        <span class="banner-stat-val" id="banner-my-ships">0</span>
+        <span style="font-size:11px;opacity:0.5">🚀</span>
+      </div>
+      <div class="banner-stat">
+        <span class="banner-stat-label">ÉQUIPE</span>
+        <span class="banner-stat-val" id="banner-team-ships">0</span>
+        <span style="font-size:11px;opacity:0.5">🚀</span>
+      </div>
+    </div>
+    <div class="banner-timer" id="banner-timer">60</div>
+  </div>
+
+  <!-- Carte -->
   <div id="map-container">
     <svg id="map-svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet">
       <defs>
@@ -340,18 +214,17 @@
     </svg>
   </div>
 
-  <!-- Panel droit : Questions -->
-  <div id="question-panel" class="hidden"></div>
-
-  <!-- Panel droit : Attaque -->
-  <div id="attack-panel" class="hidden">
-    <div class="ap-ships-big" id="ap-ships">0</div>
-    <div class="ap-ships-label">VAISSEAUX DISPONIBLES</div>
-    <div id="ap-step1" class="ap-step ap-step-active">① Clique sur une de tes planètes pour choisir le point de départ</div>
-    <div id="ap-step2" class="ap-step ap-step-waiting">② Clique sur la planète cible</div>
-    <div class="ap-selected-info" id="ap-info"></div>
-    <button class="ap-cancel" id="ap-cancel-btn" onclick="cancelAttackSelection()" style="display:none">✕ Annuler la sélection</button>
-    <button class="ap-cancel" onclick="skipAttack()" style="margin-top:8px">Passer mon tour →</button>
+  <!-- Panel droite -->
+  <div id="right-panel">
+    <div id="question-panel"></div>
+    <div id="attack-panel" class="hidden">
+      <div class="ap-ships-big" id="ap-ships">0</div>
+      <div class="ap-ships-label">VAISSEAUX DISPONIBLES</div>
+      <div id="ap-step1" class="ap-step ap-step-active">① Clique sur une de tes planètes (départ)</div>
+      <div id="ap-step2" class="ap-step ap-step-waiting">② Clique sur la planète cible</div>
+      <button class="ap-cancel" id="ap-cancel-btn" onclick="cancelAttackSelection()" style="display:none">✕ Annuler la sélection</button>
+      <button class="ap-cancel" onclick="skipAttack()" style="margin-top:8px">Passer →</button>
+    </div>
   </div>
 </div>
 
@@ -369,7 +242,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, get, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, get, update, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBQcGzJ0WN78p5YcyIzUoj3E9qXzDb00vg",
@@ -384,18 +257,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const TEAM_COLORS = { t1: '#00e5ff', t2: '#ff4444', t3: '#44ff88' };
-const TEAM_NAMES  = { t1: 'Équipe Cyan', t2: 'Équipe Rouge', t3: 'Équipe Verte' };
-const MIN_PLAYERS = 2;
+const TEAM_COLORS  = { t1: '#00e5ff', t2: '#ff4444', t3: '#44ff88' };
+const TEAM_NAMES   = { t1: 'Équipe Cyan', t2: 'Équipe Rouge', t3: 'Équipe Verte' };
+const PLANET_NAMES = { t1: '★ AETHON', t2: '★ MALACHAR', t3: '★ VIRIDIS' };
+const MIN_PLAYERS  = 2;
+const ANIM_DURATION = 2700;
 
 let myId = null, myTeam = null, myPseudo = null;
 let gameState = null;
 let questions = [], currentQ = 0, answers = [], earnedShips = 0;
-let attackStep = 0; // 0=idle, 1=choix départ, 2=choix arrivée
-let fromPlanet = null, toPlanet = null;
-let regenInterval = null;
-let timerInterval = null;
+let attackStep = 0, fromPlanet = null, toPlanet = null;
+let regenInterval = null, timerInterval = null;
 let attackPending = false;
+let myTotalShips = 0; // total envoyés par moi dans cette partie
 
 // ===== STARS =====
 (function() {
@@ -445,7 +319,7 @@ window.joinLobby = async function() {
   Object.values(existing).forEach(p => { if (p.team) counts[p.team]++; });
   myTeam = Object.keys(counts).reduce((a,b) => counts[a] <= counts[b] ? a : b);
 
-  await set(ref(db, `game/players/${myId}`), { pseudo, team: myTeam, id: myId, online: true });
+  await set(ref(db, `game/players/${myId}`), { pseudo, team: myTeam, id: myId, online: true, totalShips: 0 });
   document.getElementById('players-waiting').style.display = 'block';
 
   onValue(ref(db, 'game/players'), snap => {
@@ -513,27 +387,72 @@ function generateMap() {
 function startGameScreen() {
   document.getElementById('lobby-screen').classList.add('hidden');
   document.getElementById('game-screen').classList.remove('hidden');
-  const color = TEAM_COLORS[myTeam];
-  document.getElementById('hud-player').innerHTML = `<span style="color:${color}">●</span> ${myPseudo} — ${TEAM_NAMES[myTeam]}`;
 
+  // HUD player
+  const color = TEAM_COLORS[myTeam];
+  document.getElementById('hud-player').innerHTML = `<span style="color:${color}">●</span> ${myPseudo}`;
+
+  // Bandeau équipe
+  const banner = document.getElementById('team-banner');
+  banner.style.background = hexToRgba(color, 0.12);
+  banner.style.borderBottom = `1px solid ${hexToRgba(color, 0.3)}`;
+  const planetEl = document.getElementById('banner-planet');
+  planetEl.textContent = PLANET_NAMES[myTeam];
+  planetEl.style.color = color;
+  planetEl.style.textShadow = `0 0 20px ${hexToRgba(color, 0.5)}`;
+
+  // Écoute carte
   onValue(ref(db, 'game/map'), snap => {
     gameState = snap.val();
     if (gameState) renderMap(gameState);
   });
-  onValue(ref(db, 'game/timer'), snap => { const t = snap.val(); if (t !== null) updateTimer(t); });
-  onValue(ref(db, 'game/phase'), snap => {
-    const phase = snap.val();
-    if (phase === 'questions') startQuestions();
-    else if (phase === 'attack') showAttackPanel();
-    else if (phase === 'idle') hideAllPanels();
+
+  // Écoute joueurs pour total équipe + regen adaptative
+  onValue(ref(db, 'game/players'), snap => {
+    const players = snap.val() || {};
+    updateTeamShips(players);
+    // Regen adaptative
+    const count = Object.keys(players).length;
+    restartRegen(count);
   });
+
+  // Écoute les projectiles Firebase
+  onValue(ref(db, 'game/projectiles'), snap => {
+    const projs = snap.val();
+    if (!projs) return;
+    Object.entries(projs).forEach(([key, proj]) => {
+      if (proj.seen && proj.seen[myId]) return; // déjà animé
+      if (!proj.from || !gameState) return;
+      const fromP = { x: proj.fx, y: proj.fy };
+      const toP   = { x: proj.tx, y: proj.ty };
+      animateProjectile(fromP, toP, TEAM_COLORS[proj.team] || '#fff', proj.ships);
+      // Marque comme vu
+      set(ref(db, `game/projectiles/${key}/seen/${myId}`), true);
+    });
+  });
+
+  // Écoute victoire
   onValue(ref(db, 'game/winner'), snap => { const w = snap.val(); if (w) showWinner(w); });
 
-  startRegen();
-  setTimeout(() => {
-    set(ref(db, 'game/phase'), 'questions');
-    startGlobalTimer(60);
-  }, 1500);
+  // Lance le quiz
+  startQuiz();
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// ===== TEAM SHIPS (bandeau) =====
+function updateTeamShips(players) {
+  let teamTotal = 0;
+  Object.values(players).forEach(p => {
+    if (p.team === myTeam) teamTotal += (p.totalShips || 0);
+  });
+  document.getElementById('banner-my-ships').textContent = myTotalShips;
+  document.getElementById('banner-team-ships').textContent = teamTotal;
 }
 
 // ===== MAP RENDERING =====
@@ -542,30 +461,26 @@ function renderMap(planets) {
   layer.innerHTML = '';
   Object.values(planets).forEach(p => {
     const color = p.team === 'neutral' ? '#888888' : TEAM_COLORS[p.team];
-    const fid = p.team === 'neutral' ? 'glow-n' : `glow-${p.team}`;
+    const fid   = p.team === 'neutral' ? 'glow-n' : `glow-${p.team}`;
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     g.setAttribute('id', `planet-g-${p.id}`);
     g.style.cursor = 'pointer';
     g.addEventListener('click', () => onPlanetClick(p.id));
 
-    // Halo
-    const halo = makeSVGCircle(p.x, p.y, p.r+8, 'none', color, '1', '0.3');
+    const halo = mkCircle(p.x, p.y, p.r+8, 'none', color, '1', '0.3');
     halo.setAttribute('filter', `url(#${fid})`);
     g.appendChild(halo);
 
-    // Corps
-    const circle = makeSVGCircle(p.x, p.y, p.r, color, 'none', '0', p.team==='neutral'?'0.4':'0.7');
-    circle.setAttribute('filter', `url(#${fid})`);
-    g.appendChild(circle);
+    const body = mkCircle(p.x, p.y, p.r, color, 'none', '0', p.team==='neutral'?'0.4':'0.7');
+    body.setAttribute('filter', `url(#${fid})`);
+    g.appendChild(body);
 
-    // Anneau home
     if (p.isHome) {
-      const ring = makeSVGCircle(p.x, p.y, p.r+14, 'none', color, '1.5', '0.5');
+      const ring = mkCircle(p.x, p.y, p.r+14, 'none', color, '1.5', '0.5');
       ring.setAttribute('stroke-dasharray', '4 4');
       g.appendChild(ring);
     }
 
-    // Texte compteur
     const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     txt.setAttribute('x', p.x); txt.setAttribute('y', p.y+5);
     txt.setAttribute('text-anchor', 'middle');
@@ -580,29 +495,24 @@ function renderMap(planets) {
     layer.appendChild(g);
   });
 
-  // Redessine les cercles de sélection si en cours
-  if (attackStep === 1 && fromPlanet) highlightPlanet(fromPlanet, 'from');
-  if (attackStep === 2 && fromPlanet) highlightPlanet(fromPlanet, 'from');
-
+  if (fromPlanet) highlightPlanet(fromPlanet);
   updateHudScores(planets);
   checkWinner(planets);
 }
 
-function makeSVGCircle(cx, cy, r, fill, stroke, strokeW, opacity) {
+function mkCircle(cx, cy, r, fill, stroke, sw, opacity) {
   const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', r);
   c.setAttribute('fill', fill); c.setAttribute('stroke', stroke);
-  c.setAttribute('stroke-width', strokeW); c.setAttribute('opacity', opacity);
+  c.setAttribute('stroke-width', sw); c.setAttribute('opacity', opacity);
   return c;
 }
 
-function highlightPlanet(planetId, type) {
-  // Supprime l'ancien highlight
+function highlightPlanet(planetId) {
   document.getElementById('selection-ring')?.remove();
-  if (!planetId || !gameState || !gameState[planetId]) return;
+  if (!planetId || !gameState?.[planetId]) return;
   const p = gameState[planetId];
-  const color = type === 'from' ? TEAM_COLORS[myTeam] : '#ffffff';
-  const ring = makeSVGCircle(p.x, p.y, p.r + 18, 'none', color, '3', '0.9');
+  const ring = mkCircle(p.x, p.y, p.r+18, 'none', TEAM_COLORS[myTeam], '3', '0.9');
   ring.setAttribute('id', 'selection-ring');
   ring.setAttribute('class', 'planet-selected-ring');
   ring.setAttribute('pointer-events', 'none');
@@ -617,30 +527,49 @@ function updateHudScores(planets) {
   ).join('');
 }
 
-// ===== TIMER =====
-function startGlobalTimer(seconds) {
-  let remaining = seconds;
-  set(ref(db, 'game/timer'), remaining);
+// ===== TIMER PERSONNEL =====
+function startPersonalTimer(seconds) {
   clearInterval(timerInterval);
-  timerInterval = setInterval(async () => {
+  let remaining = seconds;
+  const el = document.getElementById('banner-timer');
+  el.style.color = TEAM_COLORS[myTeam];
+  el.classList.remove('urgent');
+  el.textContent = remaining;
+  timerInterval = setInterval(() => {
     remaining--;
-    set(ref(db, 'game/timer'), remaining);
+    el.textContent = remaining;
+    if (remaining <= 10) {
+      el.style.color = '#ff4444';
+      el.classList.add('urgent');
+    }
     if (remaining <= 0) {
       clearInterval(timerInterval);
-      const phaseSnap = await get(ref(db, 'game/phase'));
-      if (phaseSnap.val() === 'questions') { set(ref(db, 'game/phase'), 'attack'); startGlobalTimer(30); }
-      else if (phaseSnap.val() === 'attack') { set(ref(db, 'game/phase'), 'questions'); startGlobalTimer(60); }
+      // Force l'affichage attaque même si questions pas finies
+      forceEndQuiz();
     }
   }, 1000);
 }
 
-function updateTimer(t) {
-  const el = document.getElementById('hud-timer');
-  el.textContent = t + 's';
-  el.classList.toggle('urgent', t <= 10);
+function forceEndQuiz() {
+  currentQ = 10; // force la fin
+  if (earnedShips > 0) {
+    showAttackPanel();
+  } else {
+    startQuiz(); // 0 vaisseau → quiz suivant direct
+  }
 }
 
-// ===== QUESTIONS =====
+// ===== QUIZ =====
+function startQuiz() {
+  questions = generateQuestions();
+  currentQ = 0; answers = []; earnedShips = 0;
+  attackStep = 0; fromPlanet = null; toPlanet = null;
+  document.getElementById('attack-panel').classList.add('hidden');
+  document.getElementById('question-panel').style.display = 'flex';
+  renderQuestion();
+  startPersonalTimer(60);
+}
+
 function generateQuestions() {
   const qs = [];
   for (let i = 0; i < 10; i++) {
@@ -651,42 +580,31 @@ function generateQuestions() {
     else if (type === 2) { a = Math.floor(Math.random()*9)+2; b = Math.floor(Math.random()*9)+2; answer = a*b; question = `${a} × ${b}`; }
     else { b = Math.floor(Math.random()*8)+2; a = b*(Math.floor(Math.random()*8)+2); answer = a/b; question = `${a} ÷ ${b}`; }
     const wrongs = new Set();
-    while (wrongs.size < 3) { let w = answer + Math.floor(Math.random()*10)-5; if (w !== answer && w > 0) wrongs.add(w); }
+    while (wrongs.size < 3) { const w = answer + Math.floor(Math.random()*10)-5; if (w !== answer && w > 0) wrongs.add(w); }
     qs.push({ question, answer, choices: [answer, ...[...wrongs]].sort(() => Math.random()-0.5) });
   }
   return qs;
 }
 
-function startQuestions() {
-  questions = generateQuestions();
-  currentQ = 0; answers = []; earnedShips = 0;
-  attackStep = 0; fromPlanet = null; toPlanet = null;
-  document.getElementById('attack-panel').classList.add('hidden');
-  document.getElementById('question-panel').classList.remove('hidden');
-  renderQuestion();
-}
-
 function renderQuestion() {
   const panel = document.getElementById('question-panel');
   if (currentQ >= 10) {
-    // Fin du quiz → affiche le résultat et attend la phase attaque
-    document.getElementById('hud-ships').textContent = earnedShips;
-    panel.innerHTML = `
-      <div class="q-result">
-        <div class="q-label">Questionnaire terminé</div>
-        <div class="q-result-score">${earnedShips}</div>
-        <div class="q-result-label">VAISSEAUX GAGNÉS</div>
-        <div class="q-result-instruction">
-          La phase d'attaque va bientôt commencer.<br>
-          Tu pourras envoyer tes vaisseaux sur la carte.
-        </div>
+    clearInterval(timerInterval);
+    if (earnedShips === 0) {
+      // 0 vaisseau → quiz suivant immédiat
+      panel.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px">
+        <div style="font-size:40px">😔</div>
+        <div style="font-family:Orbitron,monospace;font-size:13px;letter-spacing:2px;color:var(--dim)">AUCUN VAISSEAU</div>
+        <div style="font-size:12px;color:var(--dim)">Nouveau quiz dans 2s…</div>
       </div>`;
+      setTimeout(() => startQuiz(), 2000);
+    } else {
+      showAttackPanel();
+    }
     return;
   }
 
   const q = questions[currentQ];
-
-  // Progress dots
   let dotsHTML = '<div class="q-progress">';
   for (let i = 0; i < 10; i++) {
     let cls = 'q-dot';
@@ -697,11 +615,12 @@ function renderQuestion() {
   dotsHTML += '</div>';
 
   panel.innerHTML = `
-    <div class="q-label">Question <span>${currentQ+1}</span> / 10</div>
+    <div class="q-label">Question ${currentQ+1} / 10</div>
     ${dotsHTML}
     <div class="q-text">${q.question} = ?</div>
     <div class="q-answers" id="q-answers"></div>`;
 
+  panel.querySelector('#q-answers').querySelectorAll && panel.querySelector('#q-answers');
   const answersEl = panel.querySelector('#q-answers');
   q.choices.forEach(c => {
     const btn = document.createElement('button');
@@ -721,82 +640,57 @@ function answerQuestion(chosen, correct) {
     if (Number(btn.textContent) === correct) btn.classList.add('correct');
     else if (Number(btn.textContent) === chosen && !isCorrect) btn.classList.add('wrong');
   });
-  setTimeout(() => { currentQ++; renderQuestion(); }, 500);
+  setTimeout(() => { currentQ++; renderQuestion(); }, 450);
 }
 
 // ===== ATTACK PANEL =====
 function showAttackPanel() {
-  document.getElementById('question-panel').classList.add('hidden');
-  const panel = document.getElementById('attack-panel');
-  panel.classList.remove('hidden');
-  attackStep = 1;
-  fromPlanet = null; toPlanet = null;
+  clearInterval(timerInterval);
+  document.getElementById('question-panel').style.display = 'none';
+  document.getElementById('attack-panel').classList.remove('hidden');
+  attackStep = 1; fromPlanet = null; toPlanet = null;
   document.getElementById('ap-ships').textContent = earnedShips;
-  document.getElementById('hud-ships').textContent = earnedShips;
   updateAttackUI();
 }
 
-function hideAllPanels() {
-  document.getElementById('question-panel').classList.add('hidden');
-  document.getElementById('attack-panel').classList.add('hidden');
-}
-
 function updateAttackUI() {
-  const step1 = document.getElementById('ap-step1');
-  const step2 = document.getElementById('ap-step2');
-  const info  = document.getElementById('ap-info');
-  const cancelBtn = document.getElementById('ap-cancel-btn');
-
+  const s1 = document.getElementById('ap-step1');
+  const s2 = document.getElementById('ap-step2');
+  const cb = document.getElementById('ap-cancel-btn');
   if (attackStep === 1) {
-    step1.className = 'ap-step ap-step-active';
-    step1.textContent = '① Clique sur une de tes planètes (départ)';
-    step2.className = 'ap-step ap-step-waiting';
-    step2.textContent = '② Clique sur la planète cible';
-    info.textContent = '';
-    cancelBtn.style.display = 'none';
-  } else if (attackStep === 2) {
-    step1.className = 'ap-step ap-step-done';
+    s1.className = 'ap-step ap-step-active';
+    s1.textContent = '① Clique sur une de tes planètes (départ)';
+    s2.className = 'ap-step ap-step-waiting';
+    s2.textContent = '② Clique sur la planète cible';
+    cb.style.display = 'none';
+  } else {
+    s1.className = 'ap-step ap-step-done';
     const fp = gameState?.[fromPlanet];
-    step1.textContent = `① Départ : ${fp ? Math.floor(fp.ships) + ' pts' : ''}`;
-    step2.className = 'ap-step ap-step-active';
-    step2.textContent = '② Clique sur la planète cible';
-    info.textContent = '';
-    cancelBtn.style.display = 'block';
+    s1.textContent = `① Départ : ${fp ? Math.floor(fp.ships)+' pts' : '?'}`;
+    s2.className = 'ap-step ap-step-active';
+    s2.textContent = '② Clique sur la planète cible';
+    cb.style.display = 'block';
   }
 }
 
 // ===== CLIC PLANÈTE =====
 function onPlanetClick(planetId) {
-  get(ref(db, 'game/phase')).then(snap => {
-    const phase = snap.val();
-    if (phase !== 'attack') return;
-    if (earnedShips === 0) { showToast('Aucun vaisseau disponible !'); return; }
+  if (attackStep === 0) return;
+  if (earnedShips === 0) return;
+  const planet = gameState?.[planetId];
+  if (!planet) return;
 
-    const planet = gameState?.[planetId];
-    if (!planet) return;
-
-    if (attackStep === 1) {
-      // Étape 1 : sélection du départ — doit être une planète de l'équipe du joueur
-      if (planet.team !== myTeam) {
-        showToast('Choisis une de tes planètes comme point de départ !');
-        return;
-      }
-      fromPlanet = planetId;
-      attackStep = 2;
-      highlightPlanet(fromPlanet, 'from');
-      updateAttackUI();
-
-    } else if (attackStep === 2) {
-      // Étape 2 : sélection de la cible (n'importe quelle planète)
-      if (planetId === fromPlanet) {
-        showToast('Choisis une planète différente comme cible !');
-        return;
-      }
-      toPlanet = planetId;
-      // Lance l'attaque
-      fireAttack();
-    }
-  });
+  if (attackStep === 1) {
+    if (planet.team !== myTeam) { showToast('Choisis une de tes planètes comme départ !'); return; }
+    fromPlanet = planetId;
+    attackStep = 2;
+    highlightPlanet(fromPlanet);
+    updateAttackUI();
+  } else if (attackStep === 2) {
+    if (planetId === fromPlanet) { showToast('Choisis une planète différente !'); return; }
+    toPlanet = planetId;
+    fireAttack();
+  }
 }
 
 async function fireAttack() {
@@ -805,65 +699,92 @@ async function fireAttack() {
 
   const fp = gameState[fromPlanet];
   const tp = gameState[toPlanet];
+  const ships = earnedShips;
 
-  // Animation projectile avec chiffre
-  animateProjectile(fp, tp, TEAM_COLORS[myTeam], earnedShips);
+  // Écrit le projectile dans Firebase pour que tous le voient
+  const projRef = push(ref(db, 'game/projectiles'));
+  await set(projRef, {
+    fx: fp.x, fy: fp.y,
+    tx: tp.x, ty: tp.y,
+    team: myTeam, ships,
+    ts: Date.now(),
+    seen: { [myId]: true }
+  });
+  // Anime localement (déjà marqué comme vu)
+  animateProjectile({ x: fp.x, y: fp.y }, { x: tp.x, y: tp.y }, TEAM_COLORS[myTeam], ships);
 
-  // Applique sur Firebase
-  await applyAttack(toPlanet, myTeam, earnedShips);
+  // Applique l'attaque
+  await applyAttack(toPlanet, myTeam, ships);
 
-  // Reset
-  earnedShips = 0;
-  attackStep = 0;
-  fromPlanet = null; toPlanet = null;
+  // Met à jour le total envoyé
+  myTotalShips += ships;
+  await update(ref(db, `game/players/${myId}`), { totalShips: myTotalShips });
+  document.getElementById('banner-my-ships').textContent = myTotalShips;
+
+  // Nettoyage projectiles vieux (> 10s)
+  cleanOldProjectiles();
+
+  earnedShips = 0; attackStep = 0; fromPlanet = null; toPlanet = null;
   document.getElementById('ap-ships').textContent = 0;
-  document.getElementById('hud-ships').textContent = 0;
   document.getElementById('selection-ring')?.remove();
   attackPending = false;
-
-  // Masque le panel
   document.getElementById('attack-panel').classList.add('hidden');
-  showToast('Vaisseaux lancés ! 🚀');
+  document.getElementById('question-panel').style.display = 'flex';
+
+  // Relance quiz immédiatement
+  startQuiz();
+}
+
+async function cleanOldProjectiles() {
+  const snap = await get(ref(db, 'game/projectiles'));
+  const projs = snap.val();
+  if (!projs) return;
+  const now = Date.now();
+  const updates = {};
+  Object.entries(projs).forEach(([k, p]) => {
+    if (now - p.ts > 10000) updates[`game/projectiles/${k}`] = null;
+  });
+  if (Object.keys(updates).length > 0) update(ref(db), updates);
 }
 
 window.cancelAttackSelection = function() {
-  attackStep = 1;
-  fromPlanet = null;
+  attackStep = 1; fromPlanet = null;
   document.getElementById('selection-ring')?.remove();
   updateAttackUI();
 };
 
 window.skipAttack = function() {
-  earnedShips = 0;
-  attackStep = 0;
-  fromPlanet = null; toPlanet = null;
-  document.getElementById('ap-ships').textContent = 0;
-  document.getElementById('hud-ships').textContent = 0;
+  earnedShips = 0; attackStep = 0; fromPlanet = null; toPlanet = null;
   document.getElementById('selection-ring')?.remove();
   document.getElementById('attack-panel').classList.add('hidden');
-  showToast('Tour passé.');
+  document.getElementById('question-panel').style.display = 'flex';
+  startQuiz();
 };
 
 async function applyAttack(planetId, attackerTeam, ships) {
-  const planetRef = ref(db, `game/map/${planetId}`);
-  const snap = await get(planetRef);
+  const pRef = ref(db, `game/map/${planetId}`);
+  const snap = await get(pRef);
   const planet = snap.val();
   if (!planet) return;
   if (planet.team === attackerTeam) {
-    await update(planetRef, { ships: planet.ships + ships });
+    await update(pRef, { ships: planet.ships + ships });
   } else {
     const newShips = planet.ships - ships;
     if (newShips <= 0) {
-      await update(planetRef, { team: attackerTeam, ships: Math.abs(newShips) });
+      await update(pRef, { team: attackerTeam, ships: Math.abs(newShips) });
     } else {
-      await update(planetRef, { ships: newShips });
+      await update(pRef, { ships: newShips });
     }
   }
 }
 
-// ===== REGEN =====
-function startRegen() {
+// ===== REGEN ADAPTATIVE =====
+let lastPlayerCount = 0;
+function restartRegen(playerCount) {
+  if (playerCount === lastPlayerCount) return;
+  lastPlayerCount = playerCount;
   if (regenInterval) clearInterval(regenInterval);
+  const interval = Math.round(6000 / Math.max(playerCount, 1));
   regenInterval = setInterval(async () => {
     const snap = await get(ref(db, 'game/state'));
     if (snap.val() !== 'playing') return;
@@ -875,65 +796,52 @@ function startRegen() {
       if (p.team !== 'neutral') updates[`game/map/${p.id}/ships`] = (p.ships||0) + 1;
     });
     if (Object.keys(updates).length > 0) update(ref(db), updates);
-  }, 2000);
+  }, interval);
 }
 
 // ===== PROJECTILE ANIMATION =====
 function animateProjectile(from, to, color, ships) {
   const layer = document.getElementById('projectiles-layer');
+  const mx = (from.x+to.x)/2, my = (from.y+to.y)/2;
+  const dx = to.y-from.y, dy = from.x-to.x;
+  const len = Math.hypot(dx,dy)||1;
+  const dist = Math.hypot(to.x-from.x, to.y-from.y);
+  const cx = mx + dx/len*dist*0.3;
+  const cy = my + dy/len*dist*0.3;
 
-  // Groupe : cercle + chiffre
-  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-
-  const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  dot.setAttribute('r', '6');
-  dot.setAttribute('fill', color);
-  dot.setAttribute('opacity', '0.95');
-
-  const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  label.setAttribute('text-anchor', 'middle');
-  label.setAttribute('dy', '-10');
-  label.setAttribute('font-family', 'Orbitron,monospace');
-  label.setAttribute('font-size', '12');
-  label.setAttribute('font-weight', '700');
-  label.setAttribute('fill', color);
-  label.setAttribute('pointer-events', 'none');
-  label.textContent = ships;
-
-  // Trajet courbe (arc)
+  // Ligne de trajet
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  const mx = (from.x + to.x) / 2;
-  const my = (from.y + to.y) / 2;
-  const dx = to.y - from.y, dy = from.x - to.x;
-  const len = Math.hypot(dx, dy) || 1;
-  const curve = 0.3;
-  const cx = mx + dx/len * Math.hypot(to.x-from.x, to.y-from.y) * curve;
-  const cy = my + dy/len * Math.hypot(to.x-from.x, to.y-from.y) * curve;
   path.setAttribute('d', `M${from.x},${from.y} Q${cx},${cy} ${to.x},${to.y}`);
   path.setAttribute('fill', 'none');
   path.setAttribute('stroke', color);
   path.setAttribute('stroke-width', '1');
   path.setAttribute('stroke-dasharray', '4 4');
-  path.setAttribute('opacity', '0.4');
+  path.setAttribute('opacity', '0.35');
   layer.appendChild(path);
 
-  g.appendChild(dot);
-  g.appendChild(label);
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  dot.setAttribute('r', '6'); dot.setAttribute('fill', color); dot.setAttribute('opacity', '0.95');
+
+  const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('dy', '-10');
+  lbl.setAttribute('font-family', 'Orbitron,monospace'); lbl.setAttribute('font-size', '12');
+  lbl.setAttribute('font-weight', '700'); lbl.setAttribute('fill', color);
+  lbl.setAttribute('pointer-events', 'none'); lbl.textContent = ships;
+
+  g.appendChild(dot); g.appendChild(lbl);
   layer.appendChild(g);
 
-  const duration = 900;
   const start = performance.now();
   function animate(now) {
-    const t = Math.min((now - start) / duration, 1);
-    // Interpolation sur la courbe de Bézier quadratique
+    const t = Math.min((now-start)/ANIM_DURATION, 1);
     const bx = (1-t)*(1-t)*from.x + 2*(1-t)*t*cx + t*t*to.x;
     const by = (1-t)*(1-t)*from.y + 2*(1-t)*t*cy + t*t*to.y;
     g.setAttribute('transform', `translate(${bx},${by})`);
     if (t < 1) {
       requestAnimationFrame(animate);
     } else {
-      layer.removeChild(g);
-      layer.removeChild(path);
+      try { layer.removeChild(g); layer.removeChild(path); } catch(e) {}
     }
   }
   requestAnimationFrame(animate);
@@ -944,10 +852,9 @@ function checkWinner(planets) {
   const teams = { t1: 0, t2: 0, t3: 0 };
   let neutrals = 0;
   Object.values(planets).forEach(p => { if (p.team === 'neutral') neutrals++; else teams[p.team]++; });
-  const total = Object.values(planets).length;
-  const nonNeutral = total - neutrals;
+  const nonNeutral = Object.values(planets).length - neutrals;
   for (const [team, count] of Object.entries(teams)) {
-    if (nonNeutral > 0 && count / nonNeutral >= 0.8) { set(ref(db, 'game/winner'), team); return; }
+    if (nonNeutral > 0 && count/nonNeutral >= 0.8) { set(ref(db, 'game/winner'), team); return; }
   }
 }
 
@@ -962,11 +869,11 @@ function showWinner(team) {
 }
 
 window.resetGame = async function() {
+  await remove(ref(db, 'game'));
   await set(ref(db, 'game'), { state: 'lobby' });
   location.reload();
 };
 
-// Expose pour HTML onclick
 window.joinLobby = window.joinLobby;
 window.launchGame = window.launchGame;
 window.cancelAttackSelection = window.cancelAttackSelection;
