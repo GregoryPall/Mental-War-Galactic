@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -363,24 +363,24 @@ let myTotalShips = 0; // total envoyés par moi dans cette partie
     ctx.translate(cx, cy);
     ctx.rotate(milkyAngle);
 
-    // Bande centrale floue
+    // Bande centrale très diffuse
     const grad = ctx.createLinearGradient(-W * 0.6, 0, W * 0.6, 0);
-    grad.addColorStop(0,   'rgba(0,0,0,0)');
-    grad.addColorStop(0.2, 'rgba(60,50,120,0.06)');
-    grad.addColorStop(0.38,'rgba(100,80,180,0.13)');
-    grad.addColorStop(0.5, 'rgba(140,120,220,0.18)');
-    grad.addColorStop(0.62,'rgba(100,80,180,0.13)');
-    grad.addColorStop(0.8, 'rgba(60,50,120,0.06)');
-    grad.addColorStop(1,   'rgba(0,0,0,0)');
+    grad.addColorStop(0,    'rgba(0,0,0,0)');
+    grad.addColorStop(0.15, 'rgba(40,35,90,0.02)');
+    grad.addColorStop(0.35, 'rgba(70,55,130,0.05)');
+    grad.addColorStop(0.5,  'rgba(90,75,160,0.07)');
+    grad.addColorStop(0.65, 'rgba(70,55,130,0.05)');
+    grad.addColorStop(0.85, 'rgba(40,35,90,0.02)');
+    grad.addColorStop(1,    'rgba(0,0,0,0)');
     ctx.fillStyle = grad;
     ctx.fillRect(-W * 0.6, -H * 0.6, W * 1.2, H * 1.2);
 
-    // Nuage de poudre d'étoiles sur la bande
-    for (let i = 0; i < 180; i++) {
-      const nx = (Math.random() - 0.5) * W * 1.1;
-      const ny = (Math.random() - 0.5) * H * 0.22;
-      const nr = Math.random() * 1.1 + 0.1;
-      const na = Math.random() * 0.45 + 0.05;
+    // Poudre d'étoiles éparse sur la bande
+    for (let i = 0; i < 90; i++) {
+      const nx = (Math.random() - 0.5) * W * 1.2;
+      const ny = (Math.random() - 0.5) * H * 0.30;
+      const nr = Math.random() * 0.8 + 0.1;
+      const na = Math.random() * 0.18 + 0.02;
       ctx.beginPath();
       ctx.arc(nx, ny, nr, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(200,190,255,${na})`;
@@ -484,8 +484,9 @@ window.joinLobby = async function() {
   const counts = { t1: 0, t2: 0, t3: 0 };
   Object.values(existing).forEach(p => { if (p.team) counts[p.team]++; });
   myTeam = Object.keys(counts).reduce((a,b) => counts[a] <= counts[b] ? a : b);
+  const isFirst = Object.keys(existing).length === 0;
 
-  await set(ref(db, `game/players/${myId}`), { pseudo, team: myTeam, id: myId, online: true, totalShips: 0 });
+  await set(ref(db, `game/players/${myId}`), { pseudo: myPseudo, team: myTeam, id: myId, online: true, totalShips: 0, isFirst });
   document.getElementById('players-waiting').style.display = 'block';
 
   onValue(ref(db, 'game/players'), snap => {
@@ -494,9 +495,13 @@ window.joinLobby = async function() {
     const count = Object.keys(players).length;
     const ls = document.getElementById('launch-section');
     const li = document.getElementById('launch-info');
-    if (count >= MIN_PLAYERS) {
+    const myEntry = players[myId];
+    if (count >= MIN_PLAYERS && myEntry?.isFirst) {
       ls.style.display = 'block';
       li.textContent = `${count} commandant(s) prêt(s) — lancer la partie !`;
+    } else if (count >= MIN_PLAYERS) {
+      ls.style.display = 'none';
+      li.textContent = `${count} commandant(s) prêt(s) — en attente du lancement…`;
     } else {
       ls.style.display = 'none';
       li.textContent = `En attente... (${count}/${MIN_PLAYERS})`;
@@ -642,6 +647,49 @@ function updateTeamShips(players) {
 // Suivi de l'équipe précédente de chaque planète pour détecter les conquêtes
 let prevPlanetTeams = {};
 
+function planetCraters(p) {
+  let s = 0;
+  for (let i = 0; i < p.id.length; i++) s = (s * 31 + p.id.charCodeAt(i)) & 0x7fffffff;
+  function rng() { s = (s * 1664525 + 1013904223) & 0x7fffffff; return s / 0x7fffffff; }
+
+  const clipId = `cclip-${p.id}`;
+  const defs = document.getElementById('map-svg').querySelector('defs');
+  const oldClip = document.getElementById(clipId);
+  if (oldClip) oldClip.remove();
+  const clip = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+  clip.setAttribute('id', clipId);
+  const clipC = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  clipC.setAttribute('cx', p.x); clipC.setAttribute('cy', p.y); clipC.setAttribute('r', p.r - 2);
+  clip.appendChild(clipC);
+  defs.appendChild(clip);
+
+  const cg = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  cg.setAttribute('clip-path', `url(#${clipId})`);
+  cg.setAttribute('pointer-events', 'none');
+
+  const n = 3 + Math.floor(rng() * 3);
+  for (let i = 0; i < n; i++) {
+    const angle = rng() * Math.PI * 2;
+    const dist  = rng() * p.r * 0.68;
+    const cr    = (0.06 + rng() * 0.10) * p.r;
+    const cx    = p.x + Math.cos(angle) * dist;
+    const cy    = p.y + Math.sin(angle) * dist;
+
+    const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    shadow.setAttribute('cx', cx); shadow.setAttribute('cy', cy);
+    shadow.setAttribute('rx', cr); shadow.setAttribute('ry', cr * 0.65);
+    shadow.setAttribute('fill', 'rgba(0,0,0,0.22)');
+    cg.appendChild(shadow);
+
+    const lit = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    lit.setAttribute('cx', cx - cr * 0.3); lit.setAttribute('cy', cy - cr * 0.3);
+    lit.setAttribute('rx', cr * 0.55); lit.setAttribute('ry', cr * 0.35);
+    lit.setAttribute('fill', 'rgba(255,255,255,0.07)');
+    cg.appendChild(lit);
+  }
+  return cg;
+}
+
 function renderMap(planets) {
   const layer = document.getElementById('planets-layer');
   layer.innerHTML = '';
@@ -707,6 +755,9 @@ function renderMap(planets) {
     body.setAttribute('stroke-opacity', p.team==='neutral' ? '0.3' : '0.6');
     body.setAttribute('filter', `url(#${fid})`);
     g.appendChild(body);
+
+    // Cratères lunaires
+    g.appendChild(planetCraters(p));
 
     // Reflet lumineux (petit arc en haut à gauche)
     const shine = mkCircle(p.x - p.r*0.25, p.y - p.r*0.25, p.r*0.28, 'rgba(255,255,255,0.18)', 'none', '0', '1');
@@ -876,6 +927,7 @@ window.ingSelectLevel = function(level) {
     const btn = document.getElementById(`ing-lvl-${l}`);
     if (btn) btn.classList.toggle('selected', l === level);
   });
+  if (myId) update(ref(db, `game/players/${myId}`), { level: myLevel });
   const confirmBtn = document.getElementById('ing-confirm-btn');
   if (confirmBtn) confirmBtn.classList.add('ready');
 };
@@ -1316,4 +1368,4 @@ window.skipAttack = window.skipAttack;
 window.resetGame = window.resetGame;
 </script>
 </body>
-</html>w
+</html>
