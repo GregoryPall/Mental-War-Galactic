@@ -350,8 +350,6 @@
       <span id="status-text">Connexion Firebase…</span>
     </div>
     <div class="header-actions">
-      <button class="btn btn-warn" onclick="forcePhase('questions')" title="Forcer phase questions">▶ Questions</button>
-      <button class="btn btn-warn" onclick="forcePhase('attack')" title="Forcer phase attaque">⚔ Attaque</button>
       <button class="btn btn-danger" onclick="openResetModal()">🗑 Reset complet</button>
     </div>
   </div>
@@ -526,18 +524,9 @@ function initAdmin() {
     }
   });
 
-  // Timer
-  onValue(ref(db, 'game/timer'), snap => {
-    const t = snap.val();
-    document.getElementById('admin-timer').textContent = t !== null ? t + 's' : '—';
-  });
-
-  // Phase
-  onValue(ref(db, 'game/phase'), snap => {
-    const p = snap.val();
-    const labels = { questions: '🧠 Phase Questions', attack: '⚔ Phase Attaque', idle: '— En attente' };
-    document.getElementById('admin-phase').textContent = labels[p] || '—';
-  });
+  // Timer (plus utilisé globalement — chaque joueur a son propre timer)
+  document.getElementById('admin-timer').textContent = '—';
+  document.getElementById('admin-phase').textContent = 'Quiz continu / autonome';
 
   // Carte
   onValue(ref(db, 'game/map'), snap => {
@@ -679,11 +668,6 @@ function detectChanges(prev, next) {
 }
 
 // ===== ACTIONS ADMIN =====
-window.forcePhase = async function(phase) {
-  await set(ref(db, 'game/phase'), phase);
-  addLog(`Admin → Phase forcée : ${phase}`);
-}
-
 window.openResetModal = function() {
   document.getElementById('confirm-modal').classList.remove('hidden');
 }
