@@ -182,6 +182,10 @@
   @keyframes selectPulse { 0% { stroke-width: 3; opacity: 0.9; } 50% { stroke-width: 6; opacity: 0.5; } 100% { stroke-width: 3; opacity: 0.9; } }
   .planet-selected-ring { animation: selectPulse 1s infinite; }
   @keyframes rotatePlanetRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* game-screen ne doit pas être position:fixed (ça écrase les dimensions des enfants fixed) */
+  #game-screen { position: static; display: none; }
+  #game-screen:not(.hidden) { display: block; }
 </style>
 </head>
 <body>
