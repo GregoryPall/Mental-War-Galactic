@@ -83,12 +83,12 @@
     z-index: 99;
     border-bottom: 1px solid rgba(255,255,255,0.08);
   }
-  .banner-planet { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; letter-spacing: 3px; }
-  .banner-stats { display: flex; gap: 32px; font-size: 12px; }
+  .banner-planet { font-family: 'Orbitron', monospace; font-size: 17px; font-weight: 700; letter-spacing: 3px; }
+  .banner-stats { display: flex; gap: 32px; font-size: 14px; }
   .banner-stat { display: flex; align-items: center; gap: 8px; }
-  .banner-stat-label { letter-spacing: 1px; opacity: 0.6; font-size: 10px; }
-  .banner-stat-val { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 15px; }
-  .banner-timer { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 700; min-width: 60px; text-align: right; }
+  .banner-stat-label { letter-spacing: 1px; opacity: 0.6; font-size: 12px; }
+  .banner-stat-val { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 20px; }
+  .banner-timer { font-family: 'Orbitron', monospace; font-size: 26px; font-weight: 700; min-width: 60px; text-align: right; }
   .banner-timer.urgent { animation: pulse 0.5s infinite alternate; }
   @keyframes pulse { from { opacity: 1; } to { opacity: 0.3; } }
 
@@ -108,7 +108,7 @@
   /* Questions */
   #question-panel { padding: 24px 22px; display: flex; flex-direction: column; flex: 1; overflow-y: auto; }
   #question-panel.hidden { display: none; }
-  .q-label { font-size: 10px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; margin-bottom: 10px; }
+  .q-label { font-size: 14px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; margin-bottom: 10px; }
   .q-progress { display: flex; gap: 5px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
   .q-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: background 0.3s; }
   .q-dot.correct { background: var(--team3); box-shadow: 0 0 8px var(--team3); }
@@ -150,6 +150,7 @@
 
   @keyframes selectPulse { 0% { stroke-width: 3; opacity: 0.9; } 50% { stroke-width: 6; opacity: 0.5; } 100% { stroke-width: 3; opacity: 0.9; } }
   .planet-selected-ring { animation: selectPulse 1s infinite; }
+  @keyframes rotatePlanetRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -271,22 +272,137 @@ let regenInterval = null, timerInterval = null;
 let attackPending = false;
 let myTotalShips = 0; // total envoyés par moi dans cette partie
 
-// ===== STARS =====
+// ===== FOND SPATIAL : Voie Lactée + Étoiles + Filantes =====
 (function() {
   const canvas = document.getElementById('stars');
   const ctx = canvas.getContext('2d');
-  function resize() {
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    for (let i=0;i<200;i++) {
-      ctx.beginPath();
-      ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*1.5, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(200,220,255,${Math.random()*0.8+0.2})`;
-      ctx.fill();
+
+  // Étoiles fixes
+  let stars = [];
+  // Étoiles filantes
+  let shootingStars = [];
+  let lastShoot = 0;
+  // Angle de rotation lente de la voie lactée
+  let milkyAngle = 0;
+
+  function buildStars() {
+    stars = [];
+    for (let i = 0; i < 320; i++) {
+      stars.push({
+        x: Math.random(), y: Math.random(),
+        r: Math.random() * 1.4 + 0.2,
+        a: Math.random() * 0.7 + 0.2,
+        twinkle: Math.random() * Math.PI * 2
+      });
     }
   }
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    buildStars();
+  }
+
+  function drawMilkyWay(t) {
+    const W = canvas.width, H = canvas.height;
+    const cx = W * 0.5, cy = H * 0.5;
+    // Rotation très lente
+    milkyAngle = t * 0.00004;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(milkyAngle);
+
+    // Bande centrale floue
+    const grad = ctx.createLinearGradient(-W * 0.6, 0, W * 0.6, 0);
+    grad.addColorStop(0,   'rgba(0,0,0,0)');
+    grad.addColorStop(0.2, 'rgba(60,50,120,0.06)');
+    grad.addColorStop(0.38,'rgba(100,80,180,0.13)');
+    grad.addColorStop(0.5, 'rgba(140,120,220,0.18)');
+    grad.addColorStop(0.62,'rgba(100,80,180,0.13)');
+    grad.addColorStop(0.8, 'rgba(60,50,120,0.06)');
+    grad.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(-W * 0.6, -H * 0.6, W * 1.2, H * 1.2);
+
+    // Nuage de poudre d'étoiles sur la bande
+    for (let i = 0; i < 180; i++) {
+      const nx = (Math.random() - 0.5) * W * 1.1;
+      const ny = (Math.random() - 0.5) * H * 0.22;
+      const nr = Math.random() * 1.1 + 0.1;
+      const na = Math.random() * 0.45 + 0.05;
+      ctx.beginPath();
+      ctx.arc(nx, ny, nr, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,190,255,${na})`;
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  function drawStars(t) {
+    const W = canvas.width, H = canvas.height;
+    stars.forEach(s => {
+      const twinkle = 0.5 + 0.5 * Math.sin(s.twinkle + t * 0.001);
+      const a = s.a * (0.6 + 0.4 * twinkle);
+      ctx.beginPath();
+      ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(210,225,255,${a})`;
+      ctx.fill();
+    });
+  }
+
+  function spawnShootingStar() {
+    const W = canvas.width, H = canvas.height;
+    const angle = (Math.random() * 30 + 15) * Math.PI / 180;
+    const startX = Math.random() * W * 0.7;
+    const startY = Math.random() * H * 0.4;
+    shootingStars.push({
+      x: startX, y: startY,
+      vx: Math.cos(angle) * (6 + Math.random() * 5),
+      vy: Math.sin(angle) * (6 + Math.random() * 5),
+      len: 80 + Math.random() * 80,
+      life: 1.0,
+      decay: 0.018 + Math.random() * 0.012
+    });
+  }
+
+  function drawShootingStars() {
+    shootingStars = shootingStars.filter(s => s.life > 0);
+    shootingStars.forEach(s => {
+      const tailX = s.x - s.vx * (s.len / Math.hypot(s.vx, s.vy));
+      const tailY = s.y - s.vy * (s.len / Math.hypot(s.vx, s.vy));
+      const grad = ctx.createLinearGradient(tailX, tailY, s.x, s.y);
+      grad.addColorStop(0, `rgba(255,255,255,0)`);
+      grad.addColorStop(1, `rgba(255,255,255,${s.life * 0.85})`);
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(s.x, s.y);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      s.x += s.vx;
+      s.y += s.vy;
+      s.life -= s.decay;
+    });
+  }
+
+  function loop(t) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawMilkyWay(t);
+    drawStars(t);
+    drawShootingStars();
+    // Étoile filante toutes les ~12-18s
+    if (t - lastShoot > 12000 + Math.random() * 6000) {
+      spawnShootingStar();
+      lastShoot = t;
+    }
+    requestAnimationFrame(loop);
+  }
+
   window.addEventListener('resize', resize);
   resize();
+  requestAnimationFrame(loop);
 })();
 
 // ===== TOAST =====
@@ -354,12 +470,24 @@ function renderLobbyPlayers(players) {
 }
 
 window.launchGame = async function() {
-  const map = generateMap();
-  await update(ref(db, 'game'), { state: 'playing', map, startedAt: Date.now() });
+  const playersSnap = await get(ref(db, 'game/players'));
+  const playerCount = Object.keys(playersSnap.val() || {}).length;
+  const map = generateMap(playerCount);
+  // Désigne le lanceur comme maître de la regen
+  await update(ref(db, 'game'), { state: 'playing', map, regenMaster: myId, startedAt: Date.now() });
 };
 
 // ===== MAP GENERATION =====
-function generateMap() {
+function neutralCount(playerCount) {
+  // 2 joueurs → 3, 6 → 6, 12 → 8, 24 → 10
+  if (playerCount <= 2)  return 3;
+  if (playerCount <= 4)  return 4;
+  if (playerCount <= 6)  return 6;
+  if (playerCount <= 12) return 8;
+  return 10;
+}
+
+function generateMap(playerCount) {
   const planets = {};
   const W = 1000, H = 700, margin = 100;
   const teamPos = [{ x: 180, y: 350 }, { x: 820, y: 200 }, { x: 820, y: 520 }];
@@ -367,7 +495,8 @@ function generateMap() {
     planets[`planet_${team}`] = { id: `planet_${team}`, x: teamPos[i].x, y: teamPos[i].y, r: 40, team, ships: 50, isHome: true };
   });
   const placed = [...teamPos];
-  for (let n = 0; n < 8; n++) {
+  const nNeutral = neutralCount(playerCount || 2);
+  for (let n = 0; n < nNeutral; n++) {
     let pos, attempts = 0;
     do {
       pos = { x: margin + Math.random()*(W-2*margin), y: margin + Math.random()*(H-2*margin) };
@@ -411,9 +540,10 @@ function startGameScreen() {
   onValue(ref(db, 'game/players'), snap => {
     const players = snap.val() || {};
     updateTeamShips(players);
-    // Regen adaptative
+    // Regen : seul le maître écrit, les autres écoutent
+    watchRegenMaster(players);
     const count = Object.keys(players).length;
-    restartRegen(count);
+    if (amRegenMaster) restartRegen(count);
   });
 
   // Écoute les projectiles Firebase
@@ -456,31 +586,97 @@ function updateTeamShips(players) {
 }
 
 // ===== MAP RENDERING =====
+// Suivi de l'équipe précédente de chaque planète pour détecter les conquêtes
+let prevPlanetTeams = {};
+
 function renderMap(planets) {
   const layer = document.getElementById('planets-layer');
   layer.innerHTML = '';
+
   Object.values(planets).forEach(p => {
     const color = p.team === 'neutral' ? '#888888' : TEAM_COLORS[p.team];
     const fid   = p.team === 'neutral' ? 'glow-n' : `glow-${p.team}`;
+
+    // Détection conquête
+    if (prevPlanetTeams[p.id] !== undefined &&
+        prevPlanetTeams[p.id] !== p.team &&
+        p.team !== 'neutral') {
+      triggerConquestWave(p.x, p.y, color);
+    }
+    prevPlanetTeams[p.id] = p.team;
+
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     g.setAttribute('id', `planet-g-${p.id}`);
     g.style.cursor = 'pointer';
     g.addEventListener('click', () => onPlanetClick(p.id));
 
-    const halo = mkCircle(p.x, p.y, p.r+8, 'none', color, '1', '0.3');
+    // Halo externe
+    const halo = mkCircle(p.x, p.y, p.r+10, 'none', color, '1', '0.2');
     halo.setAttribute('filter', `url(#${fid})`);
     g.appendChild(halo);
 
-    const body = mkCircle(p.x, p.y, p.r, color, 'none', '0', p.team==='neutral'?'0.4':'0.7');
+    // Dégradé sphérique (effet 3D)
+    const gradId = `grad-${p.id}`;
+    const defs = document.getElementById('map-svg').querySelector('defs');
+    // Supprime l'ancien dégradé si existe
+    const oldGrad = document.getElementById(gradId);
+    if (oldGrad) oldGrad.remove();
+
+    const radGrad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+    radGrad.setAttribute('id', gradId);
+    radGrad.setAttribute('cx', '38%'); radGrad.setAttribute('cy', '35%');
+    radGrad.setAttribute('r', '60%');
+
+    const hexToRgbObj = (hex) => ({
+      r: parseInt(hex.slice(1,3),16),
+      g: parseInt(hex.slice(3,5),16),
+      b: parseInt(hex.slice(5,7),16)
+    });
+    const rgb = hexToRgbObj(color);
+
+    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop1.setAttribute('offset', '0%');
+    stop1.setAttribute('stop-color', `rgba(${Math.min(rgb.r+80,255)},${Math.min(rgb.g+80,255)},${Math.min(rgb.b+80,255)},${p.team==='neutral'?'0.5':'0.85'})`);
+
+    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop2.setAttribute('offset', '60%');
+    stop2.setAttribute('stop-color', `rgba(${rgb.r},${rgb.g},${rgb.b},${p.team==='neutral'?'0.35':'0.7'})`);
+
+    const stop3 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop3.setAttribute('offset', '100%');
+    stop3.setAttribute('stop-color', `rgba(${Math.max(rgb.r-60,0)},${Math.max(rgb.g-60,0)},${Math.max(rgb.b-60,0)},${p.team==='neutral'?'0.2':'0.5'})`);
+
+    radGrad.appendChild(stop1); radGrad.appendChild(stop2); radGrad.appendChild(stop3);
+    defs.appendChild(radGrad);
+
+    // Corps sphérique
+    const body = mkCircle(p.x, p.y, p.r, `url(#${gradId})`, color, '1', '1');
+    body.setAttribute('stroke-opacity', p.team==='neutral' ? '0.3' : '0.6');
     body.setAttribute('filter', `url(#${fid})`);
     g.appendChild(body);
 
+    // Reflet lumineux (petit arc en haut à gauche)
+    const shine = mkCircle(p.x - p.r*0.25, p.y - p.r*0.25, p.r*0.28, 'rgba(255,255,255,0.18)', 'none', '0', '1');
+    g.appendChild(shine);
+
+    // Anneau rotatif pour planètes home (animé via CSS)
     if (p.isHome) {
-      const ring = mkCircle(p.x, p.y, p.r+14, 'none', color, '1.5', '0.5');
-      ring.setAttribute('stroke-dasharray', '4 4');
-      g.appendChild(ring);
+      const ringId = `ring-${p.id}`;
+      const ring1 = mkCircle(p.x, p.y, p.r+16, 'none', color, '1.2', '0.4');
+      ring1.setAttribute('stroke-dasharray', '6 5');
+      ring1.setAttribute('id', ringId);
+      ring1.style.transformOrigin = `${p.x}px ${p.y}px`;
+      ring1.style.animation = `rotatePlanetRing 8s linear infinite`;
+      g.appendChild(ring1);
+
+      const ring2 = mkCircle(p.x, p.y, p.r+22, 'none', color, '0.6', '0.2');
+      ring2.setAttribute('stroke-dasharray', '2 10');
+      ring2.style.transformOrigin = `${p.x}px ${p.y}px`;
+      ring2.style.animation = `rotatePlanetRing 14s linear infinite reverse`;
+      g.appendChild(ring2);
     }
 
+    // Texte compteur
     const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     txt.setAttribute('x', p.x); txt.setAttribute('y', p.y+5);
     txt.setAttribute('text-anchor', 'middle');
@@ -489,6 +685,7 @@ function renderMap(planets) {
     txt.setAttribute('font-weight', '700');
     txt.setAttribute('fill', '#fff');
     txt.setAttribute('pointer-events', 'none');
+    txt.style.textShadow = '0 0 4px rgba(0,0,0,0.8)';
     txt.textContent = Math.floor(p.ships);
     g.appendChild(txt);
 
@@ -498,6 +695,36 @@ function renderMap(planets) {
   if (fromPlanet) highlightPlanet(fromPlanet);
   updateHudScores(planets);
   checkWinner(planets);
+}
+
+// ===== ONDE DE CONQUÊTE =====
+function triggerConquestWave(cx, cy, color) {
+  const layer = document.getElementById('projectiles-layer');
+  const wave = mkCircle(cx, cy, 10, 'none', color, '3', '0.9');
+  wave.setAttribute('pointer-events', 'none');
+  layer.appendChild(wave);
+
+  const wave2 = mkCircle(cx, cy, 10, 'none', color, '1.5', '0.5');
+  wave2.setAttribute('pointer-events', 'none');
+  layer.appendChild(wave2);
+
+  const start = performance.now();
+  const duration = 800;
+  function animate(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const r1 = 10 + t * 60;
+    const r2 = 10 + t * 90;
+    wave.setAttribute('r', r1);
+    wave.setAttribute('opacity', (0.9 * (1 - t)).toString());
+    wave2.setAttribute('r', r2);
+    wave2.setAttribute('opacity', (0.5 * (1 - t)).toString());
+    if (t < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      try { layer.removeChild(wave); layer.removeChild(wave2); } catch(e) {}
+    }
+  }
+  requestAnimationFrame(animate);
 }
 
 function mkCircle(cx, cy, r, fill, stroke, sw, opacity) {
@@ -779,11 +1006,15 @@ async function applyAttack(planetId, attackerTeam, ships) {
 }
 
 // ===== REGEN ADAPTATIVE =====
+// ===== REGEN MASTER (un seul joueur écrit la regen) =====
 let lastPlayerCount = 0;
+let amRegenMaster = false;
+
 function restartRegen(playerCount) {
-  if (playerCount === lastPlayerCount) return;
+  if (playerCount === lastPlayerCount && regenInterval) return;
   lastPlayerCount = playerCount;
   if (regenInterval) clearInterval(regenInterval);
+  if (!amRegenMaster) return; // seul le maître tourne la boucle
   const interval = Math.round(6000 / Math.max(playerCount, 1));
   regenInterval = setInterval(async () => {
     const snap = await get(ref(db, 'game/state'));
@@ -799,6 +1030,22 @@ function restartRegen(playerCount) {
   }, interval);
 }
 
+function watchRegenMaster(players) {
+  // Le maître est le joueur avec l'id le plus petit parmi les connectés
+  const ids = Object.keys(players || {}).sort();
+  const masterId = ids[0] || null;
+  const wasmaster = amRegenMaster;
+  amRegenMaster = (masterId === myId);
+  if (amRegenMaster && !wasmaster) {
+    // On vient de devenir maître
+    restartRegen(ids.length);
+  } else if (!amRegenMaster && wasmaster) {
+    // On n'est plus maître
+    clearInterval(regenInterval);
+    regenInterval = null;
+  }
+}
+
 // ===== PROJECTILE ANIMATION =====
 function animateProjectile(from, to, color, ships) {
   const layer = document.getElementById('projectiles-layer');
@@ -809,39 +1056,80 @@ function animateProjectile(from, to, color, ships) {
   const cx = mx + dx/len*dist*0.3;
   const cy = my + dy/len*dist*0.3;
 
-  // Ligne de trajet
+  // Ligne de trajet pointillée
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.setAttribute('d', `M${from.x},${from.y} Q${cx},${cy} ${to.x},${to.y}`);
   path.setAttribute('fill', 'none');
   path.setAttribute('stroke', color);
   path.setAttribute('stroke-width', '1');
-  path.setAttribute('stroke-dasharray', '4 4');
-  path.setAttribute('opacity', '0.35');
+  path.setAttribute('stroke-dasharray', '4 6');
+  path.setAttribute('opacity', '0.25');
   layer.appendChild(path);
 
+  // Groupe principal : tête + label
   const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  dot.setAttribute('r', '6'); dot.setAttribute('fill', color); dot.setAttribute('opacity', '0.95');
 
+  // Traîne (plusieurs cercles qui s'estompent)
+  const trailCount = 5;
+  const trails = [];
+  for (let i = 0; i < trailCount; i++) {
+    const tr = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    tr.setAttribute('r', String(5 - i * 0.7));
+    tr.setAttribute('fill', color);
+    tr.setAttribute('opacity', '0');
+    tr.setAttribute('pointer-events', 'none');
+    layer.appendChild(tr);
+    trails.push({ el: tr, delay: (i + 1) * 0.04 });
+  }
+
+  // Tête lumineuse
+  const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  dot.setAttribute('r', '6'); dot.setAttribute('fill', color); dot.setAttribute('opacity', '1');
+
+  // Halo sur la tête
+  const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  glow.setAttribute('r', '12'); glow.setAttribute('fill', color); glow.setAttribute('opacity', '0.2');
+
+  // Label
   const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('dy', '-10');
+  lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('dy', '-14');
   lbl.setAttribute('font-family', 'Orbitron,monospace'); lbl.setAttribute('font-size', '12');
   lbl.setAttribute('font-weight', '700'); lbl.setAttribute('fill', color);
   lbl.setAttribute('pointer-events', 'none'); lbl.textContent = ships;
 
-  g.appendChild(dot); g.appendChild(lbl);
+  g.appendChild(glow); g.appendChild(dot); g.appendChild(lbl);
   layer.appendChild(g);
 
   const start = performance.now();
+  function getBezierPos(t) {
+    return {
+      x: (1-t)*(1-t)*from.x + 2*(1-t)*t*cx + t*t*to.x,
+      y: (1-t)*(1-t)*from.y + 2*(1-t)*t*cy + t*t*to.y
+    };
+  }
+
   function animate(now) {
     const t = Math.min((now-start)/ANIM_DURATION, 1);
-    const bx = (1-t)*(1-t)*from.x + 2*(1-t)*t*cx + t*t*to.x;
-    const by = (1-t)*(1-t)*from.y + 2*(1-t)*t*cy + t*t*to.y;
-    g.setAttribute('transform', `translate(${bx},${by})`);
+    const pos = getBezierPos(t);
+    g.setAttribute('transform', `translate(${pos.x},${pos.y})`);
+
+    // Traîne décalée dans le temps
+    trails.forEach((tr, i) => {
+      const tTrail = Math.max(0, t - tr.delay);
+      const tp = getBezierPos(tTrail);
+      tr.el.setAttribute('cx', tp.x);
+      tr.el.setAttribute('cy', tp.y);
+      tr.el.setAttribute('opacity', String(t > 0.02 ? (0.5 - i * 0.08) * (1 - t) : 0));
+    });
+
     if (t < 1) {
       requestAnimationFrame(animate);
     } else {
-      try { layer.removeChild(g); layer.removeChild(path); } catch(e) {}
+      try {
+        layer.removeChild(g);
+        layer.removeChild(path);
+        trails.forEach(tr => layer.removeChild(tr.el));
+      } catch(e) {}
     }
   }
   requestAnimationFrame(animate);
