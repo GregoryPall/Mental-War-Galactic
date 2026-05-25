@@ -350,6 +350,7 @@
       <span id="status-text">Connexion Firebase…</span>
     </div>
     <div class="header-actions">
+      <button class="btn btn-warn" id="force-launch-btn" onclick="forceLaunch()" style="display:none">⚡ Forcer lancement</button>
       <button class="btn btn-danger" onclick="openResetModal()">🗑 Reset complet</button>
     </div>
   </div>
@@ -513,15 +514,19 @@ function initAdmin() {
     const state = snap.val() || 'stopped';
     const badge = document.getElementById('state-badge');
     badge.className = 'state-badge';
+    const flBtn = document.getElementById('force-launch-btn');
     if (state === 'playing') {
       badge.classList.add('state-playing');
       badge.innerHTML = '<span>●</span> Partie en cours';
+      flBtn.style.display = 'none';
     } else if (state === 'lobby') {
       badge.classList.add('state-lobby');
       badge.innerHTML = '<span>●</span> Lobby';
+      flBtn.style.display = 'inline-flex';
     } else {
       badge.classList.add('state-stopped');
       badge.innerHTML = '<span>●</span> Arrêtée';
+      flBtn.style.display = 'none';
     }
   });
 
@@ -678,7 +683,54 @@ function detectChanges(prev, next) {
   });
 }
 
+// ===== GÉNÉRATION CARTE (miroir de index.html) =====
+function neutralCount(playerCount) {
+  if (playerCount <= 2)  return 3;
+  if (playerCount <= 4)  return 4;
+  if (playerCount <= 6)  return 6;
+  if (playerCount <= 12) return 8;
+  return 10;
+}
+function generateMap(playerCount) {
+  const W = 1000, H = 700, margin = 80;
+  const teams = ['t1','t2','t3'];
+  const teamPos = [
+    { x: 150, y: 350 },
+    { x: 850, y: 180 },
+    { x: 850, y: 520 }
+  ];
+  const planets = {};
+  teams.forEach((team, i) => {
+    planets[`planet_${team}`] = { id: `planet_${team}`, x: teamPos[i].x, y: teamPos[i].y, r: 40, team, ships: 50, isHome: true };
+  });
+  const placed = [...teamPos];
+  const nNeutral = neutralCount(playerCount || 1);
+  for (let n = 0; n < nNeutral; n++) {
+    let pos, attempts = 0;
+    do {
+      pos = { x: margin + Math.random()*(W-2*margin), y: margin + Math.random()*(H-2*margin) };
+      attempts++;
+    } while (attempts < 100 && placed.some(p => Math.hypot(p.x-pos.x, p.y-pos.y) < 130));
+    placed.push(pos);
+    planets[`planet_n${n}`] = {
+      id: `planet_n${n}`, x: Math.round(pos.x), y: Math.round(pos.y),
+      r: 20 + Math.floor(Math.random()*12), team: 'neutral',
+      ships: 10 + Math.floor(Math.random()*21), isHome: false
+    };
+  }
+  return planets;
+}
+
 // ===== ACTIONS ADMIN =====
+window.forceLaunch = async function() {
+  const playersSnap = await get(ref(db, 'game/players'));
+  const players = playersSnap.val() || {};
+  const onlineCount = Object.values(players).filter(p => p.online !== false).length;
+  const map = generateMap(Math.max(onlineCount, 1));
+  await update(ref(db, 'game'), { state: 'playing', map, startedAt: Date.now() });
+  addLog(`⚡ Lancement forcé par l'admin (${onlineCount} joueur(s) connecté(s)).`);
+};
+
 window.openResetModal = function() {
   document.getElementById('confirm-modal').classList.remove('hidden');
 }

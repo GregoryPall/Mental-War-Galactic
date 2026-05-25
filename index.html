@@ -80,7 +80,7 @@
   .level-info { flex: 1; }
   .level-name { font-family: 'Orbitron', monospace; font-size: 11px; letter-spacing: 2px; font-weight: 700; margin-bottom: 3px; }
   .level-desc { font-size: 10px; color: var(--dim); }
-  .level-pts { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+  .level-pts { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; color: var(--gold); flex-shrink: 0; white-space: nowrap; }
   .level-confirm-btn {
     margin: 0 22px 20px;
     padding: 12px; border: none; border-radius: 2px;
@@ -908,7 +908,7 @@ function showLevelSelector() {
           <div class="level-name" style="color:${color1}">ÉCLAIREUR</div>
           <div class="level-desc">Additions, soustractions, tables ≤5</div>
         </div>
-        <div class="level-pts">10 pts max</div>
+        <div class="level-pts">10 pts</div>
       </button>
       <button class="level-btn" id="ing-lvl-2" onclick="ingSelectLevel(2)">
         <img class="level-ship-img" src="${SHIP_IMAGES[2]}" alt="">
@@ -916,7 +916,7 @@ function showLevelSelector() {
           <div class="level-name" style="color:${color2}">CROISEUR</div>
           <div class="level-desc">Multiplications ×12, divisions</div>
         </div>
-        <div class="level-pts">30 pts max</div>
+        <div class="level-pts">30 pts</div>
       </button>
       <button class="level-btn" id="ing-lvl-3" onclick="ingSelectLevel(3)">
         <img class="level-ship-img" src="${SHIP_IMAGES[3]}" alt="">
@@ -924,7 +924,7 @@ function showLevelSelector() {
           <div class="level-name" style="color:${color3}">AMIRAL</div>
           <div class="level-desc">Décimaux, fractions, pourcentages</div>
         </div>
-        <div class="level-pts">60 pts max</div>
+        <div class="level-pts">60 pts</div>
       </button>
     </div>
     <button class="level-confirm-btn" id="ing-confirm-btn" onclick="startQuiz()">▶ Commencer</button>`;
@@ -1217,7 +1217,7 @@ function restartRegen(playerCount) {
   lastPlayerCount = playerCount;
   if (regenInterval) clearInterval(regenInterval);
   if (!amRegenMaster) return; // seul le maître tourne la boucle
-  const interval = Math.round(6000 / Math.max(playerCount, 1));
+  const interval = Math.round(15000 / Math.max(playerCount, 1));
   regenInterval = setInterval(async () => {
     const snap = await get(ref(db, 'game/state'));
     if (snap.val() !== 'playing') return;
