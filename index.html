@@ -290,7 +290,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, get, update, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, get, update, onValue, push, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBQcGzJ0WN78p5YcyIzUoj3E9qXzDb00vg",
@@ -485,18 +485,21 @@ window.joinLobby = async function() {
 
   const playersSnap = await get(ref(db, 'game/players'));
   const existing = playersSnap.val() || {};
+  const onlinePlayers = Object.values(existing).filter(p => p.online !== false);
   const counts = { t1: 0, t2: 0, t3: 0 };
-  Object.values(existing).forEach(p => { if (p.team) counts[p.team]++; });
+  onlinePlayers.forEach(p => { if (p.team) counts[p.team]++; });
   myTeam = Object.keys(counts).reduce((a,b) => counts[a] <= counts[b] ? a : b);
-  const isFirst = Object.keys(existing).length === 0;
+  const isFirst = onlinePlayers.length === 0;
 
   await set(ref(db, `game/players/${myId}`), { pseudo: myPseudo, team: myTeam, id: myId, online: true, totalShips: 0, isFirst });
+  onDisconnect(ref(db, `game/players/${myId}/online`)).set(false);
   document.getElementById('players-waiting').style.display = 'block';
 
   onValue(ref(db, 'game/players'), snap => {
     const players = snap.val() || {};
-    renderLobbyPlayers(players);
-    const count = Object.keys(players).length;
+    const onlineOnly = Object.fromEntries(Object.entries(players).filter(([,p]) => p.online !== false));
+    renderLobbyPlayers(onlineOnly);
+    const count = Object.keys(onlineOnly).length;
     const ls = document.getElementById('launch-section');
     const li = document.getElementById('launch-info');
     const myEntry = players[myId];
@@ -1228,8 +1231,8 @@ function restartRegen(playerCount) {
 }
 
 function watchRegenMaster(players) {
-  // Le maître est le joueur avec l'id le plus petit parmi les connectés
-  const ids = Object.keys(players || {}).sort();
+  // Le maître est le joueur avec l'id le plus petit parmi les connectés (online:true)
+  const ids = Object.keys(players || {}).filter(id => players[id].online !== false).sort();
   const masterId = ids[0] || null;
   const wasmaster = amRegenMaster;
   amRegenMaster = (masterId === myId);

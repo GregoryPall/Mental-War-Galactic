@@ -420,6 +420,7 @@
             <tr>
               <th>Pseudo</th>
               <th>Équipe</th>
+              <th>Niveau</th>
               <th>Statut</th>
             </tr>
           </thead>
@@ -624,18 +625,28 @@ function updateStats(planets) {
 }
 
 // ===== JOUEURS =====
+const LEVEL_NAMES  = { 1: 'Éclaireur', 2: 'Croiseur', 3: 'Amiral' };
+const LEVEL_COLORS = { 1: 'var(--t1)', 2: '#cc88ff', 3: 'var(--gold)' };
+
 function renderPlayers(players) {
   const list = Object.values(players);
-  document.getElementById('player-count').textContent = list.length;
+  const onlineCount = list.filter(p => p.online !== false).length;
+  document.getElementById('player-count').textContent = onlineCount + (onlineCount < list.length ? ` / ${list.length}` : '');
   const tbody = document.getElementById('players-tbody');
   tbody.innerHTML = '';
   list.forEach(p => {
     const tr = document.createElement('tr');
     const color = TEAM_COLORS[p.team] || '#666';
+    const lvl = p.level || 1;
+    const isOnline = p.online !== false;
+    const indColor = isOnline ? 'var(--t3)' : 'var(--dim)';
+    const indTitle = isOnline ? 'Connecté' : 'Déconnecté';
+    tr.style.opacity = isOnline ? '1' : '0.45';
     tr.innerHTML = `
       <td>${p.pseudo}</td>
       <td><span class="player-team-dot" style="background:${color};box-shadow:0 0 6px ${color}"></span>${TEAM_NAMES[p.team] || '—'}</td>
-      <td><span class="online-indicator"></span></td>
+      <td style="font-family:'Orbitron',monospace;font-size:10px;letter-spacing:1px;color:${LEVEL_COLORS[lvl]}">${LEVEL_NAMES[lvl] || '—'}</td>
+      <td title="${indTitle}"><span class="online-indicator" style="background:${indColor};box-shadow:0 0 6px ${indColor}"></span></td>
     `;
     tbody.appendChild(tr);
   });
