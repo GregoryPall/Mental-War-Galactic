@@ -258,6 +258,11 @@
         <filter id="glow-t2"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         <filter id="glow-t3"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         <filter id="glow-n"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="moon-surface" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.85 0.65" numOctaves="4" seed="9" result="noise"/>
+          <feColorMatrix type="matrix" in="noise" values="0 0 0 0 0.05  0 0 0 0 0.05  0 0 0 0 0.1  0 0 0 0.45 0" result="darkNoise"/>
+          <feComposite in="darkNoise" in2="SourceGraphic" operator="in"/>
+        </filter>
       </defs>
       <g id="planets-layer"></g>
       <g id="projectiles-layer"></g>
@@ -313,9 +318,9 @@ const PLANET_NAMES = { t1: '★ AETHON', t2: '★ MALACHAR', t3: '★ VIRIDIS' }
 const MIN_PLAYERS  = 3;
 const ANIM_DURATION = 2700;
 const SHIP_IMAGES  = {
-  1: 'Gemini_Generated_Image_Vaisseau Eclaireur.png',
-  2: 'Gemini_Generated_Vaisseau Croiseur.png',
-  3: 'Gemini_Generated_Image_Vaisseau Amiral.png',
+  1: 'Gemini_Generated_Image_Vaisseau%20Eclaireur.png',
+  2: 'Gemini_Generated_Vaisseau%20Croiseur.png',
+  3: 'Gemini_Generated_Image_Vaisseau%20Amiral.png',
 };
 const LEVEL_NAMES = { 1: 'ÉCLAIREUR', 2: 'CROISEUR', 3: 'AMIRAL' };
 const LEVEL_MAXPTS = { 1: 10, 2: 30, 3: 60 };
@@ -327,6 +332,7 @@ let attackStep = 0, fromPlanet = null, toPlanet = null;
 let regenInterval = null, timerInterval = null;
 let attackPending = false;
 let myTotalShips = 0; // total envoyés par moi dans cette partie
+let gameStarted = false;
 
 // ===== FOND SPATIAL : Voie Lactée + Étoiles + Filantes =====
 (function() {
@@ -518,7 +524,9 @@ window.joinLobby = async function() {
   });
 
   onValue(ref(db, 'game/state'), snap => {
-    if (snap.val() === 'playing') startGameScreen();
+    const st = snap.val();
+    if (st === 'playing') startGameScreen();
+    else if (st === 'lobby' && gameStarted) location.reload();
   });
 };
 
@@ -581,6 +589,7 @@ function generateMap(playerCount) {
 
 // ===== GAME SCREEN =====
 function startGameScreen() {
+  gameStarted = true;
   document.getElementById('lobby-screen').classList.add('hidden');
   document.getElementById('game-screen').classList.remove('hidden');
 
@@ -676,24 +685,42 @@ function planetCraters(p) {
   cg.setAttribute('clip-path', `url(#${clipId})`);
   cg.setAttribute('pointer-events', 'none');
 
-  const n = 3 + Math.floor(rng() * 3);
+  // Calque texture lunaire (bruit fractal partagé)
+  const moonTex = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  moonTex.setAttribute('cx', p.x); moonTex.setAttribute('cy', p.y);
+  moonTex.setAttribute('r', String(p.r - 1));
+  moonTex.setAttribute('fill', 'white');
+  moonTex.setAttribute('filter', 'url(#moon-surface)');
+  moonTex.setAttribute('pointer-events', 'none');
+  cg.appendChild(moonTex);
+
+  // Cratères (plus nombreux et variés)
+  const n = 4 + Math.floor(rng() * 4);
   for (let i = 0; i < n; i++) {
     const angle = rng() * Math.PI * 2;
-    const dist  = rng() * p.r * 0.68;
-    const cr    = (0.06 + rng() * 0.10) * p.r;
+    const dist  = rng() * p.r * 0.72;
+    const cr    = (0.05 + rng() * 0.12) * p.r;
     const cx    = p.x + Math.cos(angle) * dist;
     const cy    = p.y + Math.sin(angle) * dist;
 
     const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
     shadow.setAttribute('cx', cx); shadow.setAttribute('cy', cy);
     shadow.setAttribute('rx', cr); shadow.setAttribute('ry', cr * 0.65);
-    shadow.setAttribute('fill', 'rgba(0,0,0,0.22)');
+    shadow.setAttribute('fill', 'rgba(0,0,0,0.28)');
     cg.appendChild(shadow);
 
+    const rim = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    rim.setAttribute('cx', cx); rim.setAttribute('cy', cy);
+    rim.setAttribute('rx', cr); rim.setAttribute('ry', cr * 0.65);
+    rim.setAttribute('fill', 'none');
+    rim.setAttribute('stroke', 'rgba(255,255,255,0.12)');
+    rim.setAttribute('stroke-width', '0.8');
+    cg.appendChild(rim);
+
     const lit = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
-    lit.setAttribute('cx', cx - cr * 0.3); lit.setAttribute('cy', cy - cr * 0.3);
-    lit.setAttribute('rx', cr * 0.55); lit.setAttribute('ry', cr * 0.35);
-    lit.setAttribute('fill', 'rgba(255,255,255,0.07)');
+    lit.setAttribute('cx', cx - cr * 0.35); lit.setAttribute('cy', cy - cr * 0.35);
+    lit.setAttribute('rx', cr * 0.5); lit.setAttribute('ry', cr * 0.3);
+    lit.setAttribute('fill', 'rgba(255,255,255,0.09)');
     cg.appendChild(lit);
   }
   return cg;
@@ -1146,29 +1173,31 @@ async function fireAttack() {
     ts: Date.now(),
     seen: { [myId]: true }
   });
+  // Capture les valeurs avant réinitialisation
+  const impactTarget = toPlanet;
+
   // Anime localement (déjà marqué comme vu)
   animateProjectile({ x: fp.x, y: fp.y }, { x: tp.x, y: tp.y }, TEAM_COLORS[myTeam], ships);
 
-  // Applique l'attaque
-  await applyAttack(toPlanet, myTeam, ships);
-
-  // Met à jour le total envoyé
-  myTotalShips += ships;
-  await update(ref(db, `game/players/${myId}`), { totalShips: myTotalShips });
-  document.getElementById('banner-my-ships').textContent = myTotalShips;
-
-  // Nettoyage projectiles vieux (> 10s)
-  cleanOldProjectiles();
-
+  // Réinitialise l'UI immédiatement (sans attendre l'impact)
   earnedShips = 0; attackStep = 0; fromPlanet = null; toPlanet = null;
   document.getElementById('ap-ships').textContent = 0;
   document.getElementById('selection-ring')?.remove();
   attackPending = false;
   document.getElementById('attack-panel').classList.add('hidden');
   document.getElementById('question-panel').style.display = 'flex';
-
-  // Retour au sélecteur de niveau
   showLevelSelector();
+
+  // Applique l'attaque à l'impact (après l'animation)
+  setTimeout(async () => {
+    await applyAttack(impactTarget, myTeam, ships);
+    // Met à jour le total envoyé
+    myTotalShips += ships;
+    await update(ref(db, `game/players/${myId}`), { totalShips: myTotalShips });
+    document.getElementById('banner-my-ships').textContent = myTotalShips;
+    // Nettoyage projectiles vieux (> 10s)
+    cleanOldProjectiles();
+  }, ANIM_DURATION);
 }
 
 async function cleanOldProjectiles() {
@@ -1252,6 +1281,91 @@ function watchRegenMaster(players) {
     clearInterval(regenInterval);
     regenInterval = null;
   }
+}
+
+// ===== IMPACT EFFECT (onde de choc + texte dégâts) =====
+function impactEffect(pos, color, ships) {
+  const layer = document.getElementById('projectiles-layer');
+  if (!layer) return;
+
+  // — Onde de choc principale —
+  const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  ring.setAttribute('cx', pos.x); ring.setAttribute('cy', pos.y);
+  ring.setAttribute('r', '10');
+  ring.setAttribute('fill', 'none');
+  ring.setAttribute('stroke', color);
+  ring.setAttribute('stroke-width', '3');
+  ring.setAttribute('opacity', '0.9');
+  ring.setAttribute('pointer-events', 'none');
+  layer.appendChild(ring);
+
+  // — Onde secondaire (légèrement décalée) —
+  const ring2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  ring2.setAttribute('cx', pos.x); ring2.setAttribute('cy', pos.y);
+  ring2.setAttribute('r', '6');
+  ring2.setAttribute('fill', 'none');
+  ring2.setAttribute('stroke', 'white');
+  ring2.setAttribute('stroke-width', '1.5');
+  ring2.setAttribute('opacity', '0.6');
+  ring2.setAttribute('pointer-events', 'none');
+  layer.appendChild(ring2);
+
+  // — Flash de lumière au centre —
+  const flash = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  flash.setAttribute('cx', pos.x); flash.setAttribute('cy', pos.y);
+  flash.setAttribute('r', '8');
+  flash.setAttribute('fill', 'white');
+  flash.setAttribute('opacity', '0.7');
+  flash.setAttribute('pointer-events', 'none');
+  layer.appendChild(flash);
+
+  // — Texte dégâts "-N" flottant —
+  const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  txt.setAttribute('x', pos.x + 16); txt.setAttribute('y', pos.y - 10);
+  txt.setAttribute('font-family', 'Orbitron,monospace');
+  txt.setAttribute('font-size', '14');
+  txt.setAttribute('font-weight', '700');
+  txt.setAttribute('fill', color);
+  txt.setAttribute('stroke', 'black');
+  txt.setAttribute('stroke-width', '3');
+  txt.setAttribute('paint-order', 'stroke');
+  txt.setAttribute('pointer-events', 'none');
+  txt.textContent = `-${ships}`;
+  layer.appendChild(txt);
+
+  const dur = 600;
+  const start = performance.now();
+  function animImpact(now) {
+    const t = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - t, 2); // ease-out quad
+
+    // Onde principale : s'agrandit + s'estompe
+    ring.setAttribute('r', String(10 + ease * 28));
+    ring.setAttribute('opacity', String(0.9 * (1 - t)));
+    ring.setAttribute('stroke-width', String(3 * (1 - t * 0.6)));
+
+    // Onde secondaire : plus rapide
+    const t2 = Math.min(t * 1.4, 1);
+    ring2.setAttribute('r', String(6 + t2 * 20));
+    ring2.setAttribute('opacity', String(0.6 * (1 - t2)));
+
+    // Flash : disparaît vite
+    flash.setAttribute('opacity', String(0.7 * Math.max(0, 1 - t * 4)));
+
+    // Texte : monte + s'estompe
+    txt.setAttribute('y', String(pos.y - 10 - ease * 20));
+    txt.setAttribute('opacity', String(t < 0.6 ? 1 : 1 - (t - 0.6) / 0.4));
+
+    if (t < 1) {
+      requestAnimationFrame(animImpact);
+    } else {
+      try { layer.removeChild(ring); } catch(e) {}
+      try { layer.removeChild(ring2); } catch(e) {}
+      try { layer.removeChild(flash); } catch(e) {}
+      try { layer.removeChild(txt); } catch(e) {}
+    }
+  }
+  requestAnimationFrame(animImpact);
 }
 
 // ===== PROJECTILE ANIMATION =====
@@ -1343,6 +1457,8 @@ function animateProjectile(from, to, color, ships) {
         layer.removeChild(path);
         trails.forEach(tr => layer.removeChild(tr.el));
       } catch(e) {}
+      // Effet d'impact au point d'arrivée
+      impactEffect(to, color, ships);
     }
   }
   requestAnimationFrame(animate);
