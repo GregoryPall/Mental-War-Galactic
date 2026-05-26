@@ -318,9 +318,9 @@ const PLANET_NAMES = { t1: '★ AETHON', t2: '★ MALACHAR', t3: '★ VIRIDIS' }
 const MIN_PLAYERS  = 3;
 const ANIM_DURATION = 2700;
 const SHIP_IMAGES  = {
-  1: 'Gemini_Generated_Image_Vaisseau%20Eclaireur.png',
-  2: 'Gemini_Generated_Vaisseau%20Croiseur.png',
-  3: 'Gemini_Generated_Image_Vaisseau%20Amiral.png',
+  1: 'Gemini_Generated_Image_Vaisseau_Eclaireur-removebg-preview.png',
+  2: 'Gemini_Generated_Vaisseau_Croiseur-removebg-preview.png',
+  3: 'Gemini_Generated_Image_Vaisseau_Amiral-removebg-preview.png',
 };
 const LEVEL_NAMES = { 1: 'ÉCLAIREUR', 2: 'CROISEUR', 3: 'AMIRAL' };
 const LEVEL_MAXPTS = { 1: 10, 2: 30, 3: 60 };
@@ -628,7 +628,7 @@ function startGameScreen() {
     if (!projs) return;
     Object.entries(projs).forEach(([key, proj]) => {
       if (proj.seen && proj.seen[myId]) return; // déjà animé
-      if (!proj.from || !gameState) return;
+      if (proj.fx == null || !gameState) return;
       const fromP = { x: proj.fx, y: proj.fy };
       const toP   = { x: proj.tx, y: proj.ty };
       animateProjectile(fromP, toP, TEAM_COLORS[proj.team] || '#fff', proj.ships);
