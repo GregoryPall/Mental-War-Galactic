@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -961,6 +961,13 @@ function showLevelSelector() {
   document.getElementById('ing-lvl-2').addEventListener('click', () => ingSelectLevel(2));
   document.getElementById('ing-lvl-3').addEventListener('click', () => ingSelectLevel(3));
   document.getElementById('ing-confirm-btn').addEventListener('click', startQuiz);
+
+  // Pré-sélectionne le niveau actuel (myLevel vaut au moins 1 par défaut)
+  // → le bouton "Commencer" est immédiatement cliquable sans re-sélection obligatoire
+  const preBtn = document.getElementById(`ing-lvl-${myLevel}`);
+  if (preBtn) preBtn.classList.add('selected');
+  const confirmBtn = document.getElementById('ing-confirm-btn');
+  if (confirmBtn) confirmBtn.classList.add('ready');
 }
 
 window.ingSelectLevel = function(level) {
