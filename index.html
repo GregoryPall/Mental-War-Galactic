@@ -178,6 +178,35 @@
   #solo-objective { position: fixed; top: 50px; left: 0; right: 320px; height: 42px; display: flex; align-items: center; justify-content: center; gap: 16px; background: rgba(5,10,20,0.85); border-bottom: 1px solid rgba(255,215,0,0.15); z-index: 98; font-size: 12px; letter-spacing: 2px; color: var(--dim); }
   #solo-objective.hidden { display: none; }
   .solo-obj-val { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; color: var(--gold); }
+
+  /* ===== SERVEURS ===== */
+  .server-choice { display: flex; gap: 10px; margin-bottom: 20px; }
+  .server-btn { flex: 1; padding: 11px; border-radius: 2px; font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; background: rgba(0,200,255,0.05); border: 1px solid rgba(0,200,255,0.2); color: var(--dim); }
+  .server-btn.active { background: rgba(0,200,255,0.15); border-color: var(--team1); color: var(--team1); box-shadow: 0 0 16px rgba(0,229,255,0.2); }
+  .server-btn:hover:not(.active) { border-color: rgba(0,200,255,0.4); color: var(--text); }
+
+  /* ===== BOUTON FIN DE PARTIE ===== */
+  #end-game-btn { position: fixed; top: 8px; right: 16px; padding: 8px 16px; background: rgba(255,68,68,0.12); border: 1px solid rgba(255,68,68,0.35); border-radius: 2px; font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 2px; font-weight: 700; color: var(--team2); cursor: pointer; z-index: 150; transition: all 0.2s; text-transform: uppercase; }
+  #end-game-btn:hover { background: rgba(255,68,68,0.25); box-shadow: 0 0 20px rgba(255,68,68,0.3); }
+  #end-game-btn.hidden { display: none; }
+
+  /* ===== ÉCRAN RÉSULTATS ===== */
+  #results-screen { flex-direction: column; background: rgba(0,0,0,0.9); z-index: 350; }
+  .results-box { text-align: center; padding: 48px 64px; min-width: 500px; }
+  .results-title { font-family: 'Orbitron', monospace; font-size: 13px; letter-spacing: 5px; color: var(--dim); margin-bottom: 8px; text-transform: uppercase; }
+  .results-winner { font-family: 'Orbitron', monospace; font-size: 42px; font-weight: 900; letter-spacing: 4px; margin-bottom: 4px; }
+  .results-winner-sub { font-size: 12px; letter-spacing: 3px; color: var(--dim); margin-bottom: 36px; }
+  .results-scores { display: flex; gap: 16px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
+  .results-score-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 18px 24px; min-width: 130px; }
+  .results-score-card.winner-card { border-color: var(--gold); background: rgba(255,215,0,0.06); box-shadow: 0 0 20px rgba(255,215,0,0.1); }
+  .results-team-name { font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px; margin-bottom: 10px; }
+  .results-ships { font-family: 'Orbitron', monospace; font-size: 32px; font-weight: 900; margin-bottom: 2px; }
+  .results-label { font-size: 10px; letter-spacing: 2px; color: var(--dim); margin-bottom: 8px; }
+  .results-planets { font-size: 12px; color: var(--dim); }
+  .results-btns { display: flex; gap: 14px; justify-content: center; }
+  .results-btn { padding: 13px 28px; border: none; border-radius: 2px; font-family: 'Orbitron', monospace; font-size: 11px; letter-spacing: 3px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+  .results-btn-primary { background: linear-gradient(135deg, var(--team1), #0088aa); color: #000; box-shadow: 0 0 20px rgba(0,229,255,0.2); }
+  .results-btn-primary:hover { box-shadow: 0 0 40px rgba(0,229,255,0.4); transform: translateY(-1px); }
 </style>
 </head>
 <body>
@@ -217,6 +246,10 @@
   <div class="lobby-box fade-in">
     <div class="lobby-title">MENTAL WAR</div>
     <div class="lobby-sub">Galactic Edition — Multijoueur</div>
+    <div class="server-choice">
+      <button class="server-btn active" id="srv-btn-1" onclick="selectServer(1)">⚡ Serveur 1</button>
+      <button class="server-btn" id="srv-btn-2" onclick="selectServer(2)">⚡ Serveur 2</button>
+    </div>
     <input class="lobby-input" id="pseudo-input" type="text" placeholder="Ton pseudo de commandant" maxlength="16" onkeydown="if(event.key==='Enter') joinLobby()">
     <button class="btn btn-primary" id="join-btn" onclick="joinLobby()">Rejoindre la galaxie</button>
     <button class="solo-back" onclick="showHomeScreen()" style="margin-top:16px">← Retour</button>
@@ -241,6 +274,7 @@
     <div class="hud-player" id="hud-player"></div>
     <div class="hud-scores" id="hud-scores"></div>
   </div>
+  <button id="end-game-btn" class="hidden" onclick="endGameByHost()">⏹ Terminer la partie</button>
   <div id="team-banner">
     <div class="banner-planet" id="banner-planet"></div>
     <div class="banner-stats">
@@ -322,6 +356,19 @@
 
 <div id="toast" class="hidden"></div>
 
+<!-- ===== RÉSULTATS MULTI ===== -->
+<div id="results-screen" class="screen hidden">
+  <div class="results-box fade-in">
+    <div class="results-title">Fin de partie</div>
+    <div class="results-winner" id="results-winner-name"></div>
+    <div class="results-winner-sub" id="results-winner-sub"></div>
+    <div class="results-scores" id="results-scores"></div>
+    <div class="results-btns">
+      <button class="results-btn results-btn-primary" onclick="resetGame()">↩ Retour au lobby</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, get, update, onValue, push, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -337,6 +384,17 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+// ===== SERVEURS =====
+// Chemin Firebase : server1/game ou server2/game
+let currentServer = 1;
+function gameRef(path) { return ref(db, `server${currentServer}/game${path ? '/'+path : ''}`); }
+
+window.selectServer = function(num) {
+  currentServer = num;
+  document.getElementById('srv-btn-1').classList.toggle('active', num === 1);
+  document.getElementById('srv-btn-2').classList.toggle('active', num === 2);
+};
 
 const TEAM_COLORS  = { t1: '#00e5ff', t2: '#ff4444', t3: '#44ff88' };
 const TEAM_NAMES   = { t1: 'Équipe Cyan', t2: 'Équipe Rouge', t3: 'Équipe Verte' };
@@ -774,12 +832,12 @@ window.joinLobby = async function() {
   myId = 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
   document.getElementById('join-btn').disabled = true;
 
-  const stateSnap = await get(ref(db, 'game/state'));
+  const stateSnap = await get(gameRef('state'));
   if (stateSnap.val() === 'playing') {
     showToast('Partie en cours, attends la prochaine !');
     document.getElementById('join-btn').disabled = false; return;
   }
-  const playersSnap = await get(ref(db, 'game/players'));
+  const playersSnap = await get(gameRef('players'));
   const existing = playersSnap.val() || {};
   const onlinePlayers = Object.values(existing).filter(p => p.online !== false);
   const counts = { t1: 0, t2: 0, t3: 0 };
@@ -787,11 +845,11 @@ window.joinLobby = async function() {
   myTeam = Object.keys(counts).reduce((a,b) => counts[a] <= counts[b] ? a : b);
   const isFirst = onlinePlayers.length === 0;
 
-  await set(ref(db, `game/players/${myId}`), { pseudo: myPseudo, team: myTeam, id: myId, online: true, totalShips: 0, isFirst });
-  onDisconnect(ref(db, `game/players/${myId}/online`)).set(false);
+  await set(gameRef(`players/${myId}`), { pseudo: myPseudo, team: myTeam, id: myId, online: true, totalShips: 0, isFirst });
+  onDisconnect(gameRef(`players/${myId}/online`)).set(false);
   document.getElementById('players-waiting').style.display = 'block';
 
-  onValue(ref(db, 'game/players'), snap => {
+  onValue(gameRef('players'), snap => {
     const players = snap.val() || {};
     const onlineOnly = Object.fromEntries(Object.entries(players).filter(([,p]) => p.online !== false));
     renderLobbyPlayers(onlineOnly);
@@ -807,7 +865,7 @@ window.joinLobby = async function() {
       ls.style.display = 'none'; li.textContent = `En attente... (${count}/${MIN_PLAYERS})`;
     }
   });
-  onValue(ref(db, 'game/state'), snap => {
+  onValue(gameRef('state'), snap => {
     const st = snap.val();
     if (st === 'playing') startGameScreen();
     else if (st === 'lobby' && gameStarted) location.reload();
@@ -829,10 +887,10 @@ function renderLobbyPlayers(players) {
 }
 
 window.launchGame = async function() {
-  const playersSnap = await get(ref(db, 'game/players'));
+  const playersSnap = await get(gameRef('players'));
   const playerCount = Object.keys(playersSnap.val() || {}).length;
   const map = generateMap(playerCount);
-  await update(ref(db, 'game'), { state: 'playing', map, regenMaster: myId, startedAt: Date.now() });
+  await update(gameRef(), { state: 'playing', map, regenMaster: myId, startedAt: Date.now() });
 };
 
 // ===== MAP GENERATION (multi) =====
@@ -870,23 +928,30 @@ function startGameScreen() {
   const planetEl = document.getElementById('banner-planet');
   planetEl.textContent = PLANET_NAMES[myTeam]; planetEl.style.color = color;
   planetEl.style.textShadow = `0 0 20px ${hexToRgba(color, 0.5)}`;
-  onValue(ref(db, 'game/map'), snap => { gameState = snap.val(); if (gameState) renderMap(gameState); });
-  onValue(ref(db, 'game/players'), snap => {
+  onValue(gameRef('map'), snap => { gameState = snap.val(); if (gameState) renderMap(gameState); });
+  onValue(gameRef('players'), snap => {
     const players = snap.val() || {};
     updateTeamShips(players); watchRegenMaster(players);
     const count = Object.keys(players).length;
     if (amRegenMaster) restartRegen(count);
   });
-  onValue(ref(db, 'game/projectiles'), snap => {
+  onValue(gameRef('projectiles'), snap => {
     const projs = snap.val(); if (!projs) return;
     Object.entries(projs).forEach(([key, proj]) => {
       if (proj.seen && proj.seen[myId]) return;
       if (proj.fx == null || !gameState) return;
       animateProjectile({ x: proj.fx, y: proj.fy }, { x: proj.tx, y: proj.ty }, TEAM_COLORS[proj.team] || '#fff', proj.ships);
-      set(ref(db, `game/projectiles/${key}/seen/${myId}`), true);
+      set(gameRef(`projectiles/${key}/seen/${myId}`), true);
     });
   });
-  onValue(ref(db, 'game/winner'), snap => { const w = snap.val(); if (w) showWinner(w); });
+  onValue(gameRef('winner'), snap => { const w = snap.val(); if (w) showWinner(w); });
+
+  // Bouton fin de partie : visible uniquement pour le lanceur (isFirst)
+  get(gameRef(`players/${myId}`)).then(snap => {
+    const p = snap.val();
+    if (p && p.isFirst) document.getElementById('end-game-btn').classList.remove('hidden');
+  });
+
   showLevelSelector();
 }
 
@@ -1031,6 +1096,7 @@ function showLevelSelector() {
   document.getElementById('attack-panel').classList.add('hidden');
   const panel = document.getElementById('question-panel');
   panel.style.display = 'flex';
+  panel.scrollTop = 0;  // remet le scroll en haut avant de recréer le contenu
   const allowed = isSolo ? SOLO_LEVELS[soloLevelNum-1].shipsAllowed : [1,2,3];
   const color1 = 'var(--team1)', color2 = '#cc88ff', color3 = 'var(--gold)';
   const lockClass = (n) => allowed.includes(n) ? '' : 'locked-ship';
@@ -1083,13 +1149,14 @@ window.ingSelectLevel = function(level) {
   if (!allowed.includes(level)) return;
   myLevel = level;
   [1,2,3].forEach(l => { const btn = document.getElementById(`ing-lvl-${l}`); if (btn) btn.classList.toggle('selected', l === level); });
-  if (!isSolo && myId) update(ref(db, `game/players/${myId}`), { level: myLevel });
+  if (!isSolo && myId) update(gameRef(`players/${myId}`), { level: myLevel });
   const confirmBtn = document.getElementById('ing-confirm-btn');
   if (confirmBtn) confirmBtn.classList.add('ready');
 };
 
 // ===== QUIZ =====
 function startQuiz() {
+  if (isSolo && soloFinished) return; // niveau terminé, ne pas relancer
   questions = generateQuestions(myLevel);
   currentQ = 0; answers = []; earnedShips = 0;
   attackStep = 0; fromPlanet = null; toPlanet = null;
@@ -1135,7 +1202,7 @@ function renderQuestion() {
         <div style="font-family:Orbitron,monospace;font-size:13px;letter-spacing:2px;color:var(--dim)">AUCUN VAISSEAU</div>
         <div style="font-size:12px;color:var(--dim)">Nouveau quiz dans 2s…</div>
       </div>`;
-      setTimeout(() => startQuiz(), 2000);
+      setTimeout(() => { if (!isSolo || !soloFinished) startQuiz(); }, 2000);
     } else { showAttackPanel(); }
     return;
   }
@@ -1229,7 +1296,17 @@ function onPlanetClick(planetId) {
 async function fireAttack() {
   if (attackPending) return;
   attackPending = true;
-  const fp = gameState[fromPlanet], tp = gameState[toPlanet], ships = earnedShips;
+  const fp = gameState?.[fromPlanet], tp = gameState?.[toPlanet];
+  // Garde : planète disparue entre la sélection et le clic (bot ou regen)
+  if (!fp || !tp) {
+    attackPending = false;
+    showToast('Planète invalide, recommence !');
+    attackStep = 1; fromPlanet = null;
+    document.getElementById('selection-ring')?.remove();
+    updateAttackUI();
+    return;
+  }
+  const ships = earnedShips;
   const impactTarget = toPlanet;
 
   if (isSolo) {
@@ -1239,17 +1316,26 @@ async function fireAttack() {
     document.getElementById('ap-ships').textContent = 0;
     document.getElementById('selection-ring')?.remove();
     attackPending = false;
+    // Pendant l'animation : afficher message d'attente
     document.getElementById('attack-panel').classList.add('hidden');
-    document.getElementById('question-panel').style.display = 'flex';
-    showLevelSelector();
+    const panel = document.getElementById('question-panel');
+    panel.style.display = 'flex';
+    panel.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px">
+      <div style="font-size:36px">🚀</div>
+      <div style="font-family:Orbitron,monospace;font-size:12px;letter-spacing:2px;color:var(--dim)">VAISSEAUX EN ROUTE…</div>
+    </div>`;
+    // Après l'impact : appliquer et relancer seulement si pas encore terminé
     setTimeout(() => {
       soloApplyAttack(impactTarget, 't1', ships);
       myTotalShips += ships;
       document.getElementById('banner-my-ships').textContent = myTotalShips;
+      // showSoloVictory ou showSoloDefeat seront appelés par checkSoloResult si besoin
+      // Sinon on relance le sélecteur
+      if (!soloFinished) showLevelSelector();
     }, ANIM_DURATION);
   } else {
     // Multi : Firebase
-    const projRef = push(ref(db, 'game/projectiles'));
+    const projRef = push(gameRef('projectiles'));
     await set(projRef, { fx: fp.x, fy: fp.y, tx: tp.x, ty: tp.y, team: myTeam, ships, ts: Date.now(), seen: { [myId]: true } });
     animateProjectile({ x: fp.x, y: fp.y }, { x: tp.x, y: tp.y }, TEAM_COLORS[myTeam], ships);
     earnedShips = 0; attackStep = 0; fromPlanet = null; toPlanet = null;
@@ -1262,7 +1348,7 @@ async function fireAttack() {
     setTimeout(async () => {
       await applyAttack(impactTarget, myTeam, ships);
       myTotalShips += ships;
-      await update(ref(db, `game/players/${myId}`), { totalShips: myTotalShips });
+      await update(gameRef(`players/${myId}`), { totalShips: myTotalShips });
       document.getElementById('banner-my-ships').textContent = myTotalShips;
       cleanOldProjectiles();
     }, ANIM_DURATION);
@@ -1270,10 +1356,10 @@ async function fireAttack() {
 }
 
 async function cleanOldProjectiles() {
-  const snap = await get(ref(db, 'game/projectiles'));
+  const snap = await get(gameRef('projectiles'));
   const projs = snap.val(); if (!projs) return;
   const now = Date.now(), updates = {};
-  Object.entries(projs).forEach(([k, p]) => { if (now - p.ts > 10000) updates[`game/projectiles/${k}`] = null; });
+  Object.entries(projs).forEach(([k, p]) => { if (now - p.ts > 10000) updates[`server${currentServer}/game/projectiles/${k}`] = null; });
   if (Object.keys(updates).length > 0) update(ref(db), updates);
 }
 
@@ -1286,7 +1372,7 @@ window.skipAttack = function() {
 };
 
 async function applyAttack(planetId, attackerTeam, ships) {
-  const pRef = ref(db, `game/map/${planetId}`);
+  const pRef = gameRef(`map/${planetId}`);
   const snap = await get(pRef); const planet = snap.val(); if (!planet) return;
   if (planet.team === attackerTeam) { await update(pRef, { ships: planet.ships + ships }); }
   else { const newShips = planet.ships - ships; if (newShips <= 0) { await update(pRef, { team: attackerTeam, ships: Math.abs(newShips) }); } else { await update(pRef, { ships: newShips }); } }
@@ -1301,10 +1387,10 @@ function restartRegen(playerCount) {
   if (!amRegenMaster) return;
   const interval = Math.round(15000 / Math.max(playerCount, 1));
   regenInterval = setInterval(async () => {
-    const snap = await get(ref(db, 'game/state')); if (snap.val() !== 'playing') return;
-    const mapSnap = await get(ref(db, 'game/map')); const map = mapSnap.val(); if (!map) return;
+    const snap = await get(gameRef('state')); if (snap.val() !== 'playing') return;
+    const mapSnap = await get(gameRef('map')); const map = mapSnap.val(); if (!map) return;
     const updates = {};
-    Object.values(map).forEach(p => { if (p.team !== 'neutral') updates[`game/map/${p.id}/ships`] = (p.ships||0) + 1; });
+    Object.values(map).forEach(p => { if (p.team !== 'neutral') updates[`server${currentServer}/game/map/${p.id}/ships`] = (p.ships||0) + 1; });
     if (Object.keys(updates).length > 0) update(ref(db), updates);
   }, interval);
 }
@@ -1373,16 +1459,76 @@ function checkWinner(planets) {
   const teams={t1:0,t2:0,t3:0}; let neutrals=0;
   Object.values(planets).forEach(p=>{if(p.team==='neutral')neutrals++;else teams[p.team]++;});
   const nonNeutral=Object.values(planets).length-neutrals;
-  for (const [team,count] of Object.entries(teams)) { if(nonNeutral>0&&count/nonNeutral>=0.8){set(ref(db,'game/winner'),team);return;} }
+  for (const [team,count] of Object.entries(teams)) { if(nonNeutral>0&&count/nonNeutral>=0.8){set(gameRef('winner'),team);return;} }
 }
 function showWinner(team) {
   clearInterval(regenInterval);
-  document.getElementById('winner-screen').classList.remove('hidden');
-  const color=TEAM_COLORS[team];
-  document.getElementById('winner-name').textContent=TEAM_NAMES[team]; document.getElementById('winner-name').style.color=color; document.getElementById('winner-name').style.textShadow=`0 0 60px ${color}`;
-  document.getElementById('winner-sub').textContent='a conquis la galaxie !';
+  document.getElementById('end-game-btn').classList.add('hidden');
+  showResultsScreen(team);
 }
-window.resetGame = async function() { await remove(ref(db,'game')); await set(ref(db,'game'),{state:'lobby'}); location.reload(); };
+
+// ===== ÉCRAN RÉSULTATS =====
+async function showResultsScreen(winnerTeam) {
+  const mapSnap = await get(gameRef('map'));
+  const playersSnap = await get(gameRef('players'));
+  const map = mapSnap.val() || {};
+  const players = playersSnap.val() || {};
+
+  // Calcul scores par équipe
+  const scores = { t1: { ships: 0, planets: 0 }, t2: { ships: 0, planets: 0 }, t3: { ships: 0, planets: 0 } };
+  Object.values(map).forEach(p => {
+    if (scores[p.team]) { scores[p.team].ships += Math.floor(p.ships); scores[p.team].planets++; }
+  });
+  // Ships totaux envoyés par joueur agrégés par équipe
+  const sent = { t1: 0, t2: 0, t3: 0 };
+  Object.values(players).forEach(p => { if (sent[p.team] !== undefined) sent[p.team] += (p.totalShips || 0); });
+
+  // Détermine le vainqueur réel (celui qui a le plus de planètes si pas de winnerTeam)
+  let displayWinner = winnerTeam;
+  if (!displayWinner) {
+    displayWinner = Object.entries(scores).sort((a,b) => b[1].planets - a[1].planets)[0][0];
+  }
+  const winColor = TEAM_COLORS[displayWinner];
+
+  document.getElementById('results-winner-name').textContent = TEAM_NAMES[displayWinner];
+  document.getElementById('results-winner-name').style.color = winColor;
+  document.getElementById('results-winner-name').style.textShadow = `0 0 40px ${winColor}`;
+  document.getElementById('results-winner-sub').textContent = 'a conquis la galaxie !';
+
+  const scoresEl = document.getElementById('results-scores');
+  scoresEl.innerHTML = ['t1','t2','t3'].map(t => {
+    const isWinner = t === displayWinner;
+    const color = TEAM_COLORS[t];
+    return `<div class="results-score-card${isWinner?' winner-card':''}">
+      <div class="results-team-name" style="color:${color}">${TEAM_NAMES[t]}</div>
+      <div class="results-ships" style="color:${color}">${sent[t]}</div>
+      <div class="results-label">vaisseaux envoyés</div>
+      <div class="results-planets">🌍 ${scores[t].planets} planète(s)</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('results-screen').classList.remove('hidden');
+}
+
+// ===== FIN DE PARTIE PAR L'HÔTE =====
+window.endGameByHost = async function() {
+  if (!confirm('Terminer la partie et afficher les résultats ?')) return;
+  // Calcule le vainqueur actuel
+  const mapSnap = await get(gameRef('map'));
+  const map = mapSnap.val() || {};
+  const scores = { t1: 0, t2: 0, t3: 0 };
+  Object.values(map).forEach(p => { if (scores[p.team] !== undefined) scores[p.team]++; });
+  const winner = Object.entries(scores).sort((a,b) => b[1]-a[1])[0][0];
+  await set(gameRef('winner'), winner);
+};
+
+window.resetGame = async function() {
+  await remove(gameRef());
+  await set(gameRef('state'), 'lobby');
+  document.getElementById('results-screen').classList.add('hidden');
+  document.getElementById('end-game-btn').classList.add('hidden');
+  location.reload();
+};
 
 window.joinLobby = window.joinLobby;
 window.launchGame = window.launchGame;
