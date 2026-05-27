@@ -1197,6 +1197,7 @@ function renderQuestion() {
   const panel = document.getElementById('question-panel');
   if (currentQ >= 10) {
     if (earnedShips === 0) {
+      panel.scrollTop = 0;
       panel.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px">
         <div style="font-size:40px">😔</div>
         <div style="font-family:Orbitron,monospace;font-size:13px;letter-spacing:2px;color:var(--dim)">AUCUN VAISSEAU</div>
@@ -1218,6 +1219,7 @@ function renderQuestion() {
   const shipImg = SHIP_IMAGES[myLevel];
   const levelColor = myLevel===3?'var(--gold)':myLevel===2?'#cc88ff':'var(--team1)';
   const penaltyInfo = myLevel===3?' (−2 si faux)':myLevel===2?' (−1 si faux)':'';
+  panel.scrollTop = 0;
   panel.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
       <img src="${shipImg}" style="width:44px;height:30px;object-fit:contain" alt="">
@@ -1320,6 +1322,7 @@ async function fireAttack() {
     document.getElementById('attack-panel').classList.add('hidden');
     const panel = document.getElementById('question-panel');
     panel.style.display = 'flex';
+    panel.scrollTop = 0;
     panel.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px">
       <div style="font-size:36px">🚀</div>
       <div style="font-family:Orbitron,monospace;font-size:12px;letter-spacing:2px;color:var(--dim)">VAISSEAUX EN ROUTE…</div>
