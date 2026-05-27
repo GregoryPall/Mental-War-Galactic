@@ -1087,6 +1087,7 @@ function renderQuestion() {
       </div>
     </div>
     ${dotsHTML}
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px"><span style="font-size:10px;letter-spacing:2px;color:var(--dim)">VAISSEAUX</span><span id="q-ship-counter" style="font-family:Orbitron,monospace;font-size:22px;font-weight:900;color:var(--gold);text-shadow:0 0 12px rgba(255,215,0,0.4);transition:color 0.3s">${earnedShips}</span><span style="font-size:14px">🚀</span></div>
     <div class="q-text">${q.question} = ?</div>
     <div class="q-answers" id="q-answers"></div>`;
 
@@ -1104,12 +1105,24 @@ function renderQuestion() {
 function answerQuestion(chosen, correct) {
   const isCorrect = chosen === correct;
   answers.push(isCorrect);
-  if (isCorrect) earnedShips += myLevel === 3 ? 6 : myLevel === 2 ? 3 : 1;
+  const gain    = myLevel === 3 ? 6 : myLevel === 2 ? 3 : 1;
+  const penalty = myLevel === 3 ? 2 : myLevel === 2 ? 1 : 0;
+  if (isCorrect) {
+    earnedShips += gain;
+  } else {
+    earnedShips = Math.max(0, earnedShips - penalty);
+  }
   document.querySelectorAll('.q-btn').forEach(btn => {
     btn.disabled = true;
     if (Number(btn.textContent) === correct) btn.classList.add('correct');
     else if (Number(btn.textContent) === chosen && !isCorrect) btn.classList.add('wrong');
   });
+  // Met à jour le compteur de vaisseaux en temps réel
+  const shipCounter = document.getElementById('q-ship-counter');
+  if (shipCounter) {
+    shipCounter.textContent = earnedShips;
+    shipCounter.style.color = isCorrect ? 'var(--team3)' : (penalty > 0 ? 'var(--team2)' : 'var(--gold)');
+  }
   setTimeout(() => { currentQ++; renderQuestion(); }, 450);
 }
 
@@ -1441,11 +1454,19 @@ function animateProjectile(from, to, color, ships) {
       y: (1-t)*(1-t)*from.y + 2*(1-t)*t*cy + t*t*to.y
     };
   }
+  // Tangente de la courbe de Bézier quadratique : dérivée en t
+  function getBezierTangent(t) {
+    const dx = 2*(1-t)*(cx-from.x) + 2*t*(to.x-cx);
+    const dy = 2*(1-t)*(cy-from.y) + 2*t*(to.y-cy);
+    return Math.atan2(dy, dx) * 180 / Math.PI;
+  }
 
   function animate(now) {
     const t = Math.min((now-start)/ANIM_DURATION, 1);
     const pos = getBezierPos(t);
-    g.setAttribute('transform', `translate(${pos.x},${pos.y})`);
+    // +180° car les images pointent vers la gauche
+    const angle = getBezierTangent(t) + 180;
+    g.setAttribute('transform', `translate(${pos.x},${pos.y}) rotate(${angle})`);
 
     // Traîne décalée dans le temps
     trails.forEach((tr, i) => {
